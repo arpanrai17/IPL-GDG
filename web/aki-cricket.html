@@ -410,11 +410,22 @@ body{
       </div>
     </div>
 
+    <!-- Category Selector Section -->
+    <div style="margin-bottom:12px; font-weight:700; font-size:0.9rem; color:#00d4ff; text-transform:uppercase; letter-spacing:0.08em; display:flex; align-items:center; gap:8px;">
+      <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#00d4ff;"></span>
+      <span>1. Pick Your Alternate Universe Category:</span>
+    </div>
+
     <!-- Category Selector -->
     <div class="cat-wrap" id="cat-wrap">
       <button class="cat-btn active" id="cat-player" onclick="setCategory('player',this)"><span class="ci">🧑</span>Player</button>
       <button class="cat-btn" id="cat-team"  onclick="setCategory('team',this)"><span class="ci">🏟️</span>Team</button>
       <button class="cat-btn" id="cat-match" onclick="setCategory('match',this)"><span class="ci">🏆</span>Match</button>
+    </div>
+
+    <!-- Dynamic Category Description -->
+    <div id="cat-description" style="text-align:center; font-size:0.8rem; color:rgba(255,255,255,0.5); margin-top:-10px; margin-bottom:20px; font-family:'Inter',sans-serif;">
+      💡 Think of any active or historic IPL Player (e.g., Virat Kohli, MS Dhoni, Jasprit Bumrah...)
     </div>
 
     <!-- Game Header -->
@@ -676,6 +687,17 @@ function setCategory(cat,el){
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   gsap.from(el,{scale:0.88,duration:0.35,ease:'back.out(2)'});
+  
+  const descEl = document.getElementById('cat-description');
+  if (descEl) {
+    if (cat === 'player') {
+      descEl.innerHTML = "💡 Think of any active or historic IPL Player (e.g., Virat Kohli, MS Dhoni, Jasprit Bumrah...)";
+    } else if (cat === 'team') {
+      descEl.innerHTML = "💡 Think of any current or past IPL franchise (e.g., Mumbai Indians, CSK, RCB, Gujarat Titans...)";
+    } else if (cat === 'match') {
+      descEl.innerHTML = "💡 Think of any iconic IPL match (e.g., 2019 Final, 2023 Final, dynamic high-score chases...)";
+    }
+  }
 }
 
 // ── Start ────────────────────────────────────────────────────────
@@ -684,6 +706,12 @@ async function startGame(){
   document.getElementById('chat').innerHTML='';
   document.getElementById('btn-start').style.display='none';
   document.getElementById('cat-wrap').style.pointerEvents='none';
+  
+  const descEl = document.getElementById('cat-description');
+  if (descEl) {
+    descEl.innerHTML = "🎮 Game in progress! Gemini AI is reading your mind...";
+  }
+
   document.getElementById('btn-yes').disabled=true;
   document.getElementById('btn-no').disabled=true;
   document.getElementById('ans-prompt').textContent='Gemini AI is formulating its first question...';
@@ -829,6 +857,18 @@ function closeModal(){
   document.getElementById('modal-bg').classList.remove('open');
   document.getElementById('btn-start').style.display='';
   document.getElementById('cat-wrap').style.pointerEvents='';
+  
+  const descEl = document.getElementById('cat-description');
+  if (descEl) {
+    if (currentCat === 'player') {
+      descEl.innerHTML = "💡 Think of any active or historic IPL Player (e.g., Virat Kohli, MS Dhoni, Jasprit Bumrah...)";
+    } else if (currentCat === 'team') {
+      descEl.innerHTML = "💡 Think of any current or past IPL franchise (e.g., Mumbai Indians, CSK, RCB, Gujarat Titans...)";
+    } else if (currentCat === 'match') {
+      descEl.innerHTML = "💡 Think of any iconic IPL match (e.g., 2019 Final, 2023 Final, dynamic high-score chases...)";
+    }
+  }
+
   document.getElementById('btn-yes').disabled=true;
   document.getElementById('btn-no').disabled=true;
   document.getElementById('confirm-wrap').style.display='none';
