@@ -21,28 +21,54 @@
     }
     
     .tech-card {
-      padding: 22px;
-      background: rgba(255,255,255,0.02);
+      padding: 24px;
+      background: rgba(13, 21, 38, 0.85); /* Solid translucent dark-blue glass backdrop */
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-radius: 18px;
       position: relative;
       overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .tech-card:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      transform: translateY(-5px) scale(1.03);
+      background: rgba(22, 32, 53, 0.95);
+      border-color: rgba(255,255,255,0.2) !important;
+    }
+
+    /* Override dark/inherited styles and force high contrast text */
+    .tech-card h4 {
+      color: #ffffff !important;
+      font-size: 1.05rem !important;
+      font-weight: 800 !important;
+      margin-bottom: 6px !important;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+    }
+    .tech-card div[style*="font-weight: 600"],
+    .tech-card div[style*="font-weight:600"] {
+      font-weight: 700 !important;
+      font-size: 0.72rem !important;
+      letter-spacing: 0.8px !important;
+      filter: brightness(1.2) contrast(1.1) !important;
+    }
+    .tech-card p {
+      color: rgba(255, 255, 255, 0.82) !important; /* extremely clear and legible text */
+      font-size: 0.84rem !important;
+      line-height: 1.6 !important;
+      font-weight: 400 !important;
     }
 
     /* Icon box */
     .icon-box {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 16px;
-      font-size: 1.4rem;
+      font-size: 1.5rem;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
     }
 
     /* Nav Dropdown styling */
@@ -144,10 +170,10 @@
 
         <div class="tech-grid" id="used-grid">
           <!-- Card 1 -->
-          <div class="tech-card" style="border: 1px solid rgba(139, 92, 246, 0.25);">
+          <div class="tech-card" style="border: 1px solid rgba(139, 92, 246, 0.45); box-shadow: 0 4px 25px rgba(139, 92, 246, 0.15);">
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--purple);"></div>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">🧠</div>
+              <div class="icon-box" style="background: rgba(139, 92, 246, 0.15); color: var(--purple);">🧠</div>
               <span class="badge badge-green" style="font-size:0.65rem;">ACTIVE IN USE</span>
             </div>
             <h4 style="font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Gemini 1.5 Flash</h4>
@@ -156,10 +182,10 @@
           </div>
 
           <!-- Card 2 -->
-          <div class="tech-card" style="border: 1px solid rgba(66, 133, 244, 0.25);">
+          <div class="tech-card" style="border: 1px solid rgba(66, 133, 244, 0.45); box-shadow: 0 4px 25px rgba(66, 133, 244, 0.15);">
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: #4285F4;"></div>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(66, 133, 244, 0.12); color: #4285F4;">⚙️</div>
+              <div class="icon-box" style="background: rgba(66, 133, 244, 0.15); color: #4285F4;">⚙️</div>
               <span class="badge badge-green" style="font-size:0.65rem;">ACTIVE IN USE</span>
             </div>
             <h4 style="font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Google AI Studio</h4>
@@ -168,10 +194,10 @@
           </div>
 
           <!-- Card 3 -->
-          <div class="tech-card" style="border: 1px solid rgba(255, 109, 0, 0.25);">
+          <div class="tech-card" style="border: 1px solid rgba(255, 109, 0, 0.45); box-shadow: 0 4px 25px rgba(255, 109, 0, 0.15);">
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: #FF6D00;"></div>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(255, 109, 0, 0.12); color: #FF6D00;">🔥</div>
+              <div class="icon-box" style="background: rgba(255, 109, 0, 0.15); color: #FF6D00;">🔥</div>
               <span class="badge badge-blue" style="font-size:0.65rem; background:rgba(0,191,255,0.08); border-color:rgba(0,191,255,0.2); color:#00bfff;">CONFIGURED</span>
             </div>
             <h4 style="font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Firebase Hosting</h4>
@@ -180,10 +206,10 @@
           </div>
 
           <!-- Card 4 -->
-          <div class="tech-card" style="border: 1px solid rgba(0, 255, 136, 0.25);">
+          <div class="tech-card" style="border: 1px solid rgba(0, 255, 136, 0.45); box-shadow: 0 4px 25px rgba(0, 255, 136, 0.15);">
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: #00ff88;"></div>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(0, 255, 136, 0.12); color: #00ff88;">🛸</div>
+              <div class="icon-box" style="background: rgba(0, 255, 136, 0.15); color: #00ff88;">🛸</div>
               <span class="badge badge-green" style="font-size:0.65rem;">ACTIVE IN USE</span>
             </div>
             <h4 style="font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Antigravity AI</h4>
@@ -203,10 +229,10 @@
         <div class="tech-grid" id="roadmap-grid">
           
           <!-- Vertex AI -->
-          <div class="tech-card" style="border: 1px solid rgba(66, 133, 244, 0.12);">
+          <div class="tech-card" style="border: 1px solid rgba(66, 133, 244, 0.35); box-shadow: 0 4px 20px rgba(66, 133, 244, 0.1);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(66, 133, 244, 0.08); color: #4285F4;">🛰️</div>
-              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+              <div class="icon-box" style="background: rgba(66, 133, 244, 0.15); color: #4285F4;">🛰️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.15); border-color:rgba(255,64,96,0.4); color:#ff6b8b; font-weight:700;">ROADMAP</span>
             </div>
             <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Vertex AI</h4>
             <div style="font-size: 0.68rem; color: #4285F4; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">CUSTOM ML PIPELINES</div>
@@ -214,10 +240,10 @@
           </div>
 
           <!-- Cloud Vision API -->
-          <div class="tech-card" style="border: 1px solid rgba(0, 212, 255, 0.12);">
+          <div class="tech-card" style="border: 1px solid rgba(0, 212, 255, 0.35); box-shadow: 0 4px 20px rgba(0, 212, 255, 0.1);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(0, 212, 255, 0.08); color: #00d4ff;">👁️</div>
-              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+              <div class="icon-box" style="background: rgba(0, 212, 255, 0.15); color: #00d4ff;">👁️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.15); border-color:rgba(255,64,96,0.4); color:#ff6b8b; font-weight:700;">ROADMAP</span>
             </div>
             <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Cloud Vision API</h4>
             <div style="font-size: 0.68rem; color: #00d4ff; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">SCOREBOARD OCR recognition</div>
@@ -225,10 +251,10 @@
           </div>
 
           <!-- Cloud Text-to-Speech -->
-          <div class="tech-card" style="border: 1px solid rgba(0, 255, 136, 0.12);">
+          <div class="tech-card" style="border: 1px solid rgba(0, 255, 136, 0.35); box-shadow: 0 4px 20px rgba(0, 255, 136, 0.1);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(0, 255, 136, 0.08); color: #00ff88;">🎙️</div>
-              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+              <div class="icon-box" style="background: rgba(0, 255, 136, 0.15); color: #00ff88;">🎙️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.15); border-color:rgba(255,64,96,0.4); color:#ff6b8b; font-weight:700;">ROADMAP</span>
             </div>
             <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Cloud Text-to-Speech</h4>
             <div style="font-size: 0.68rem; color: #00ff88; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">SYNTHETIC commentary voices</div>
@@ -236,10 +262,10 @@
           </div>
 
           <!-- Firestore -->
-          <div class="tech-card" style="border: 1px solid rgba(255, 109, 0, 0.12);">
+          <div class="tech-card" style="border: 1px solid rgba(255, 109, 0, 0.35); box-shadow: 0 4px 20px rgba(255, 109, 0, 0.1);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(255, 109, 0, 0.08); color: #FF6D00;">🗄️</div>
-              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+              <div class="icon-box" style="background: rgba(255, 109, 0, 0.15); color: #FF6D00;">🗄️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.15); border-color:rgba(255,64,96,0.4); color:#ff6b8b; font-weight:700;">ROADMAP</span>
             </div>
             <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Cloud Firestore</h4>
             <div style="font-size: 0.68rem; color: #FF6D00; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">real-time ledger database</div>
@@ -247,10 +273,10 @@
           </div>
 
           <!-- YouTube Data API -->
-          <div class="tech-card" style="border: 1px solid rgba(234, 67, 53, 0.12);">
+          <div class="tech-card" style="border: 1px solid rgba(234, 67, 53, 0.35); box-shadow: 0 4px 20px rgba(234, 67, 53, 0.1);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(234, 67, 53, 0.08); color: #ea4335;">▶️</div>
-              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+              <div class="icon-box" style="background: rgba(234, 67, 53, 0.15); color: #ea4335;">▶️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.15); border-color:rgba(255,64,96,0.4); color:#ff6b8b; font-weight:700;">ROADMAP</span>
             </div>
             <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">YouTube Data API</h4>
             <div style="font-size: 0.68rem; color: #ea4335; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">HIGHLIGHT VIDEO METADATA</div>
@@ -258,10 +284,10 @@
           </div>
 
           <!-- BigQuery -->
-          <div class="tech-card" style="border: 1px solid rgba(0, 212, 255, 0.12);">
+          <div class="tech-card" style="border: 1px solid rgba(0, 212, 255, 0.35); box-shadow: 0 4px 20px rgba(0, 212, 255, 0.1);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(0, 212, 255, 0.08); color: #00d4ff;">🔍</div>
-              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+              <div class="icon-box" style="background: rgba(0, 212, 255, 0.15); color: #00d4ff;">🔍</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.15); border-color:rgba(255,64,96,0.4); color:#ff6b8b; font-weight:700;">ROADMAP</span>
             </div>
             <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">BigQuery</h4>
             <div style="font-size: 0.68rem; color: #00d4ff; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">HIGH-VOLUME STAT ANALYTICS</div>
@@ -269,10 +295,10 @@
           </div>
 
           <!-- Google Maps Platform -->
-          <div class="tech-card" style="border: 1px solid rgba(52, 168, 83, 0.12);">
+          <div class="tech-card" style="border: 1px solid rgba(52, 168, 83, 0.35); box-shadow: 0 4px 20px rgba(52, 168, 83, 0.1);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(52, 168, 83, 0.08); color: #34a853;">🗺️</div>
-              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+              <div class="icon-box" style="background: rgba(52, 168, 83, 0.15); color: #34a853;">🗺️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.15); border-color:rgba(255,64,96,0.4); color:#ff6b8b; font-weight:700;">ROADMAP</span>
             </div>
             <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Google Maps Platform</h4>
             <div style="font-size: 0.68rem; color: #34a853; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">STADIUM HEATMAP MAPPING</div>
@@ -280,10 +306,10 @@
           </div>
 
           <!-- Firebase Auth -->
-          <div class="tech-card" style="border: 1px solid rgba(251, 188, 4, 0.12);">
+          <div class="tech-card" style="border: 1px solid rgba(251, 188, 4, 0.35); box-shadow: 0 4px 20px rgba(251, 188, 4, 0.1);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(251, 188, 4, 0.08); color: #fbbc04;">🛡️</div>
-              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+              <div class="icon-box" style="background: rgba(251, 188, 4, 0.15); color: #fbbc04;">🛡️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.15); border-color:rgba(255,64,96,0.4); color:#ff6b8b; font-weight:700;">ROADMAP</span>
             </div>
             <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Firebase Auth</h4>
             <div style="font-size: 0.68rem; color: #fbbc04; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">SECURE GOOGLE USER PROFILES</div>
@@ -291,10 +317,10 @@
           </div>
 
           <!-- Looker Studio -->
-          <div class="tech-card" style="border: 1px solid rgba(66, 133, 244, 0.12);">
+          <div class="tech-card" style="border: 1px solid rgba(66, 133, 244, 0.35); box-shadow: 0 4px 20px rgba(66, 133, 244, 0.1);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-              <div class="icon-box" style="background: rgba(66, 133, 244, 0.08); color: #4285F4;">📊</div>
-              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+              <div class="icon-box" style="background: rgba(66, 133, 244, 0.15); color: #4285F4;">📊</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.15); border-color:rgba(255,64,96,0.4); color:#ff6b8b; font-weight:700;">ROADMAP</span>
             </div>
             <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Looker Studio</h4>
             <div style="font-size: 0.68rem; color: #4285F4; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">DATA SHEET report panels</div>
