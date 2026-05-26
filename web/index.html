@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IPL AI Suite — Gemini Flash × Firebase | GDG Hackathon 2026</title>
+  <meta name="description" content="Two AI-powered IPL experiences: Aki-Cricket Akinator and AI Watch Party hosted by Aria — built with Gemini Flash and Firebase."/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+
+  <style>
+    /* ── BASE ── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      font-family:'Outfit',sans-serif;
+      background:#060B18;
+      color:#fff;
+      overflow-x:hidden;
+      min-height:100vh;
+    }
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:#060B18; }
+    ::-webkit-scrollbar-thumb { background:#00d4ff44; border-radius:3px; }
+
+    /* ── 3D CANVAS ── */
+    #bg-canvas {
+      position:fixed; inset:0; z-index:0;
+      width:100%; height:100%;
+      pointer-events:none;
+      background:#060B18;
+    }
+
+    /* ── LAYOUT ── */
+    .page { position:relative; z-index:1; }
+
+    /* ── NAV ── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:200;
+      padding:0 48px;
+      height:68px;
+      display:flex; align-items:center; justify-content:space-between;
+      background:rgba(6,11,24,0.75);
+      backdrop-filter:blur(28px);
+      border-bottom:1px solid rgba(255,255,255,0.07);
+    }
+    .nav-logo {
+      font-weight:900; font-size:1.25rem; text-decoration:none;
+      background:linear-gradient(135deg,#00d4ff,#ffd700);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .nav-links { display:flex; gap:4px; align-items:center; }
+    .nav-link {
+      color:rgba(255,255,255,0.55); text-decoration:none;
+      font-size:0.9rem; font-weight:600; padding:8px 18px;
+      border-radius:50px; transition:all 0.2s;
+    }
+    .nav-link:hover { color:#fff; background:rgba(255,255,255,0.07); }
+    .nav-link.active { color:#00d4ff; background:rgba(0,212,255,0.08); }
+    .nav-cta {
+      background:linear-gradient(135deg,#00d4ff,#0088cc);
+      color:#060B18; font-weight:800; font-size:0.88rem;
+      padding:9px 22px; border-radius:50px; text-decoration:none;
+      box-shadow:0 0 20px rgba(0,212,255,0.3); transition:all 0.2s;
+    }
+    .nav-cta:hover { transform:translateY(-1px); box-shadow:0 0 30px rgba(0,212,255,0.5); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height:100vh; display:flex; align-items:center;
+      padding:120px 48px 80px;
+      max-width:1280px; margin:0 auto;
+      position:relative;
+    }
+    .hero-content { flex:1; max-width:680px; }
+
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 18px; border-radius:50px; margin-bottom:28px;
+      background:rgba(0,212,255,0.06);
+      border:1px solid rgba(0,212,255,0.2);
+      font-size:0.8rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;
+      color:rgba(255,255,255,0.7);
+    }
+    .hero-badge .dot { width:7px; height:7px; border-radius:50%; background:#00d4ff; animation:blink 1.5s ease infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    .hero h1 {
+      font-size:clamp(2.8rem, 6vw, 5rem);
+      font-weight:900; line-height:1.06; letter-spacing:-0.03em;
+      margin-bottom:22px;
+    }
+    .hero h1 .line-grad {
+      background:linear-gradient(135deg,#00d4ff 0%,#8b5cf6 50%,#ffd700 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .hero p {
+      font-family:'Inter',sans-serif;
+      font-size:1.15rem; line-height:1.7;
+      color:rgba(255,255,255,0.55); margin-bottom:40px;
+      max-width:540px;
+    }
+
+    .hero-btns { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:52px; }
+    .btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:14px 30px; border-radius:50px;
+      font-family:'Outfit',sans-serif; font-weight:700; font-size:0.95rem;
+      cursor:pointer; border:none; outline:none;
+      text-decoration:none; transition:all 0.25s;
+      position:relative; overflow:hidden;
+    }
+    .btn-primary {
+      background:linear-gradient(135deg,#00d4ff,#0088cc);
+      color:#060B18; box-shadow:0 0 28px rgba(0,212,255,0.35);
+    }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 0 42px rgba(0,212,255,0.5); }
+    .btn-secondary {
+      background:rgba(255,255,255,0.05); color:#fff;
+      border:1px solid rgba(255,255,255,0.12);
+      backdrop-filter:blur(16px);
+    }
+    .btn-secondary:hover { border-color:rgba(0,212,255,0.4); color:#00d4ff; background:rgba(0,212,255,0.06); }
+
+    /* Stats strip */
+    .hero-stats { display:flex; gap:36px; }
+    .hero-stat .val {
+      font-size:1.8rem; font-weight:900; letter-spacing:-0.02em;
+      background:linear-gradient(135deg,#00d4ff,#8b5cf6);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .hero-stat .key { font-size:0.78rem; color:rgba(255,255,255,0.4); font-weight:600; text-transform:uppercase; letter-spacing:0.07em; }
+
+    /* Hero 3D float area */
+    .hero-3d {
+      position:absolute; right:0; top:50%;
+      transform:translateY(-50%);
+      width:480px; height:480px;
+      pointer-events:none;
+    }
+
+    /* ── FEATURE CARDS ── */
+    .section {
+      padding:100px 48px;
+      max-width:1280px; margin:0 auto;
+    }
+    .section-label {
+      display:flex; align-items:center; gap:12px; margin-bottom:18px;
+    }
+    .section-label .bar { width:3px; height:20px; border-radius:2px; background:linear-gradient(180deg,#00d4ff,#8b5cf6); }
+    .section-label span { font-size:0.8rem; font-weight:700; color:#00d4ff; text-transform:uppercase; letter-spacing:0.1em; }
+    .section h2 { font-size:clamp(2rem,4vw,3rem); font-weight:900; letter-spacing:-0.03em; margin-bottom:56px; }
+
+    /* PS Cards — large feature cards */
+    .ps-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:80px; }
+    @media(max-width:900px){ .ps-grid{grid-template-columns:1fr;} }
+
+    .ps-card {
+      border-radius:28px; overflow:hidden;
+      border:1px solid rgba(255,255,255,0.06);
+      background:rgba(255,255,255,0.025);
+      backdrop-filter:blur(24px);
+      transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
+      cursor:pointer; text-decoration:none;
+      display:block;
+      position:relative;
+    }
+    .ps-card::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(circle at 30% 30%, var(--card-glow) 0%, transparent 60%);
+      opacity:0; transition:opacity 0.4s;
+    }
+    .ps-card:hover::before { opacity:1; }
+    .ps-card:hover { transform:translateY(-6px) scale(1.01); border-color:var(--card-border); box-shadow:var(--card-shadow); }
+
+    .ps-card-1 { --card-glow:rgba(0,212,255,0.08); --card-border:rgba(0,212,255,0.25); --card-shadow:0 24px 64px rgba(0,212,255,0.12); }
+    .ps-card-2 { --card-glow:rgba(139,92,246,0.08); --card-border:rgba(139,92,246,0.25); --card-shadow:0 24px 64px rgba(139,92,246,0.12); }
+
+    .ps-img {
+      position:relative; height:240px; overflow:hidden;
+    }
+    .ps-img img { width:100%; height:100%; object-fit:cover; filter:brightness(0.45) saturate(1.4); transition:filter 0.4s; }
+    .ps-card:hover .ps-img img { filter:brightness(0.55) saturate(1.6); }
+    .ps-img-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(180deg, transparent 40%, rgba(6,11,24,0.95) 100%);
+    }
+    .ps-num {
+      position:absolute; top:20px; left:20px;
+      width:38px; height:38px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.78rem; font-weight:800;
+      background:rgba(6,11,24,0.7);
+      border:1px solid rgba(255,255,255,0.15);
+      color:#fff;
+    }
+    .ps-title-overlay {
+      position:absolute; bottom:0; left:0; right:0; padding:24px 28px;
+    }
+
+    .ps-body { padding:28px; }
+    .ps-desc { font-family:'Inter',sans-serif; color:rgba(255,255,255,0.55); font-size:0.95rem; line-height:1.7; margin-bottom:20px; }
+    .ps-tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
+    .ps-tag {
+      padding:5px 12px; border-radius:50px; font-size:0.78rem; font-weight:600;
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+      color:rgba(255,255,255,0.6);
+    }
+
+    /* ── FEATURE GRID ── */
+    .feat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:0; }
+    @media(max-width:1100px){ .feat-grid{grid-template-columns:repeat(2,1fr);} }
+    @media(max-width:600px){ .feat-grid{grid-template-columns:1fr;} }
+
+    .feat-card {
+      padding:24px; border-radius:20px;
+      background:rgba(255,255,255,0.025);
+      border:1px solid rgba(255,255,255,0.06);
+      transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .feat-card:hover {
+      background:rgba(255,255,255,0.04);
+      border-color:rgba(0,212,255,0.2);
+      transform:translateY(-3px);
+    }
+    .feat-icon { font-size:1.8rem; margin-bottom:14px; display:block; }
+    .feat-title { font-size:1rem; font-weight:700; margin-bottom:6px; }
+    .feat-desc { font-family:'Inter',sans-serif; font-size:0.85rem; color:rgba(255,255,255,0.45); line-height:1.6; }
+    .feat-badge {
+      margin-top:14px; display:inline-block;
+      padding:3px 10px; border-radius:50px; font-size:0.72rem; font-weight:700;
+      color:rgba(255,255,255,0.5); background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    /* ── FLOATING 3D ORBS (CSS) ── */
+    .orb {
+      position:fixed; border-radius:50%;
+      pointer-events:none; z-index:0;
+      filter:blur(80px);
+    }
+    .orb-1 { width:600px; height:600px; background:rgba(0,212,255,0.04); top:-200px; left:-150px; }
+    .orb-2 { width:500px; height:500px; background:rgba(139,92,246,0.04); top:40%; right:-150px; }
+    .orb-3 { width:400px; height:400px; background:rgba(255,215,0,0.03); bottom:-100px; left:30%; }
+
+    /* ── TECH STRIP ── */
+    .tech-strip {
+      border-top:1px solid rgba(255,255,255,0.06);
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      padding:28px 0; overflow:hidden; position:relative;
+    }
+    .tech-strip-inner { display:flex; gap:56px; align-items:center; white-space:nowrap; animation:marquee 18s linear infinite; }
+    @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+    .tech-item { font-size:0.82rem; font-weight:700; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.1em; display:flex; align-items:center; gap:10px; }
+    .tech-item span { font-size:1.1rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding:60px 48px 36px;
+      border-top:1px solid rgba(255,255,255,0.06);
+      max-width:1280px; margin:0 auto;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .foot-logo {
+      font-weight:900; font-size:1.1rem;
+      background:linear-gradient(135deg,#00d4ff,#ffd700);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .foot-copy { font-size:0.82rem; color:rgba(255,255,255,0.3); }
+    .foot-links { display:flex; gap:20px; }
+    .foot-link { font-size:0.82rem; color:rgba(255,255,255,0.4); text-decoration:none; transition:color 0.2s; }
+    .foot-link:hover { color:#00d4ff; }
+
+    /* ── GRAD ── */
+    .g-blue  { background:linear-gradient(135deg,#00d4ff,#8b5cf6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .g-gold  { background:linear-gradient(135deg,#ffd700,#ff4060); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .g-purple{ background:linear-gradient(135deg,#8b5cf6,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+    /* Badges */
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:5px 14px; border-radius:50px; font-size:0.78rem; font-weight:700; }
+    .badge-blue  { background:rgba(0,212,255,0.1); color:#00d4ff; border:1px solid rgba(0,212,255,0.25); }
+    .badge-gold  { background:rgba(255,215,0,0.1); color:#ffd700; border:1px solid rgba(255,215,0,0.25); }
+    .badge-purple{ background:rgba(139,92,246,0.1); color:#8b5cf6; border:1px solid rgba(139,92,246,0.25); }
+
+    @media(max-width:768px){
+      nav { padding:0 20px; }
+      .hero { padding:100px 20px 60px; }
+      .hero-3d { display:none; }
+      .section { padding:70px 20px; }
+      footer { flex-direction:column; gap:20px; padding:40px 20px; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Deep dark BG canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Ambient orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="page">
+<!-- ── NAV ── -->
+<nav>
+  <a href="index.html" class="nav-logo">🏏 IPL AI Suite</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link active">Home</a>
+    <a href="aki-cricket.html" class="nav-link">Aki-Cricket</a>
+    <a href="watch-party.html" class="nav-link">Watch Party</a>
+    <a href="aki-cricket.html" class="nav-cta">Play Now →</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section style="position:relative; overflow:hidden;">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <div class="dot"></div>
+        GDG Hackathon 2026 · PS1 & PS2
+      </div>
+      <h1>
+        IPL meets<br/>
+        <span class="line-grad">Gemini AI</span>
+      </h1>
+      <p>Two world-class AI experiences for the IPL season. An adaptive mind-reading oracle and a Gemini-powered live watch party host — all in one suite.</p>
+      <div class="hero-btns">
+        <a href="aki-cricket.html" class="btn btn-primary">🎮 Play Aki-Cricket</a>
+        <a href="watch-party.html" class="btn btn-secondary">🎙️ Start Watch Party</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="val">15</div><div class="key">Max Questions</div></div>
+        <div class="hero-stat"><div class="val">2min</div><div class="key">Session Timer</div></div>
+        <div class="hero-stat"><div class="val">6</div><div class="key">Party Features</div></div>
+        <div class="hero-stat"><div class="val">87%</div><div class="key">AI Accuracy</div></div>
+      </div>
+    </div>
+
+    <!-- 3D Hero visual — rendered by Three.js -->
+    <div class="hero-3d" id="hero-3d-wrap"></div>
+  </div>
+</section>
+
+<!-- ── TECH STRIP ── -->
+<div class="tech-strip">
+  <div class="tech-strip-inner">
+    <div class="tech-item"><span>✨</span>Gemini Flash</div>
+    <div class="tech-item"><span>🔥</span>Firebase</div>
+    <div class="tech-item"><span>🎮</span>Aki-Cricket</div>
+    <div class="tech-item"><span>🎙️</span>AI Watch Party</div>
+    <div class="tech-item"><span>📊</span>Live Leaderboard</div>
+    <div class="tech-item"><span>🏏</span>IPL 2026</div>
+    <div class="tech-item"><span>🧠</span>Adaptive AI</div>
+    <div class="tech-item"><span>⚡</span>Real-time</div>
+    <!-- repeat for seamless loop -->
+    <div class="tech-item"><span>✨</span>Gemini Flash</div>
+    <div class="tech-item"><span>🔥</span>Firebase</div>
+    <div class="tech-item"><span>🎮</span>Aki-Cricket</div>
+    <div class="tech-item"><span>🎙️</span>AI Watch Party</div>
+    <div class="tech-item"><span>📊</span>Live Leaderboard</div>
+    <div class="tech-item"><span>🏏</span>IPL 2026</div>
+    <div class="tech-item"><span>🧠</span>Adaptive AI</div>
+    <div class="tech-item"><span>⚡</span>Real-time</div>
+  </div>
+</div>
+
+<!-- ── PS CARDS ── -->
+<section class="section">
+  <div class="section-label">
+    <div class="bar"></div>
+    <span>Problem Statements</span>
+  </div>
+  <h2>Two AI Experiences,<br/><span class="g-blue">One Suite</span></h2>
+
+  <div class="ps-grid">
+    <!-- PS1 -->
+    <a href="aki-cricket.html" class="ps-card ps-card-1" data-tilt data-tilt-max="6" data-tilt-speed="600" data-tilt-glare="true" data-tilt-max-glare="0.1">
+      <div class="ps-img">
+        <img src="assets/aki_character.png" alt="Aki-Cricket"/>
+        <div class="ps-img-overlay"></div>
+        <div class="ps-num">PS1</div>
+        <div class="ps-title-overlay">
+          <div class="badge badge-blue" style="margin-bottom:8px;">🧠 Adaptive AI Engine</div><br/>
+          <span style="font-size:1.6rem;font-weight:900;letter-spacing:-0.03em;" class="g-blue">Aki-Cricket</span><br/>
+          <span style="font-size:0.88rem;color:rgba(255,255,255,0.6);">The AI IPL Akinator</span>
+        </div>
+      </div>
+      <div class="ps-body">
+        <p class="ps-desc">Think of any IPL player, team or historic match. Gemini AI has exactly 15 Yes/No questions to read your mind — using binary-search adaptive logic and a live persona system.</p>
+        <div class="ps-tags">
+          <div class="ps-tag">⏱️ 2-Min Timer</div>
+          <div class="ps-tag">🎭 5 AI Personas</div>
+          <div class="ps-tag">🏆 Leaderboard</div>
+          <div class="ps-tag">🎊 Confetti Win</div>
+          <div class="ps-tag">📊 Stats Tracking</div>
+        </div>
+        <div class="btn btn-primary" style="width:100%;justify-content:center;">🎮 Play Aki-Cricket →</div>
+      </div>
+    </a>
+
+    <!-- PS2 -->
+    <a href="watch-party.html" class="ps-card ps-card-2" data-tilt data-tilt-max="6" data-tilt-speed="600" data-tilt-glare="true" data-tilt-max-glare="0.1">
+      <div class="ps-img">
+        <img src="assets/aria_host.png" alt="Watch Party"/>
+        <div class="ps-img-overlay"></div>
+        <div class="ps-num">PS2</div>
+        <div class="ps-title-overlay">
+          <div class="badge badge-purple" style="margin-bottom:8px;">🎙️ Gemini Flash Host</div><br/>
+          <span style="font-size:1.6rem;font-weight:900;letter-spacing:-0.03em;" class="g-purple">AI Watch Party</span><br/>
+          <span style="font-size:0.88rem;color:rgba(255,255,255,0.6);">Hosted by Aria — Your AI MC</span>
+        </div>
+      </div>
+      <div class="ps-body">
+        <p class="ps-desc">Aria is your Gemini-powered IPL watch party host. Live commentary, 8-round trivia with timers, milestone reactions, giveaway orchestration and a full audience Q&A chatbot.</p>
+        <div class="ps-tags">
+          <div class="ps-tag">📺 Commentary</div>
+          <div class="ps-tag">🎯 8-Round Trivia</div>
+          <div class="ps-tag">📣 Milestones</div>
+          <div class="ps-tag">🎁 Giveaways</div>
+          <div class="ps-tag">💬 Live Chat</div>
+        </div>
+        <div class="btn" style="width:100%;justify-content:center;background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;box-shadow:0 0 28px rgba(139,92,246,0.35);">🎉 Start Watch Party →</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Feature grid -->
+  <div class="section-label">
+    <div class="bar" style="background:linear-gradient(180deg,#ffd700,#ff4060);"></div>
+    <span>All Features</span>
+  </div>
+  <h2 style="margin-bottom:36px;">Everything<br/><span class="g-gold">Included</span></h2>
+
+  <div class="feat-grid">
+    <div class="feat-card" data-tilt data-tilt-max="8">
+      <span class="feat-icon">🧠</span>
+      <div class="feat-title">Adaptive AI Questioning</div>
+      <div class="feat-desc">Binary-search strategy that mathematically halves the IPL pool each round.</div>
+      <div class="feat-badge">PS1</div>
+    </div>
+    <div class="feat-card" data-tilt data-tilt-max="8">
+      <span class="feat-icon">😤</span>
+      <div class="feat-title">Live Persona System</div>
+      <div class="feat-desc">5 dynamic moods — Confident → Dramatic — as the question count rises.</div>
+      <div class="feat-badge">PS1</div>
+    </div>
+    <div class="feat-card" data-tilt data-tilt-max="8">
+      <span class="feat-icon">⏱️</span>
+      <div class="feat-title">2-Min Countdown</div>
+      <div class="feat-desc">SVG arc timer with color-coded urgency and auto-guess on timeout.</div>
+      <div class="feat-badge">PS1</div>
+    </div>
+    <div class="feat-card" data-tilt data-tilt-max="8">
+      <span class="feat-icon">🏆</span>
+      <div class="feat-title">Firebase Leaderboard</div>
+      <div class="feat-desc">Global win-streak tracking synced instantly to Firebase.</div>
+      <div class="feat-badge">PS1</div>
+    </div>
+    <div class="feat-card" data-tilt data-tilt-max="8">
+      <span class="feat-icon">📺</span>
+      <div class="feat-title">Streaming Commentary</div>
+      <div class="feat-desc">Harsha Bhogle-style live commentary streamed token by token.</div>
+      <div class="feat-badge">PS2</div>
+    </div>
+    <div class="feat-card" data-tilt data-tilt-max="8">
+      <span class="feat-icon">🎯</span>
+      <div class="feat-title">IPL Trivia Engine</div>
+      <div class="feat-desc">8 curated rounds, 15-second timer, real-time scoring and grade.</div>
+      <div class="feat-badge">PS2</div>
+    </div>
+    <div class="feat-card" data-tilt data-tilt-max="8">
+      <span class="feat-icon">🎁</span>
+      <div class="feat-title">AI Giveaway Picker</div>
+      <div class="feat-desc">Dramatic winner selection with Aria's personalized announcement.</div>
+      <div class="feat-badge">PS2</div>
+    </div>
+    <div class="feat-card" data-tilt data-tilt-max="8">
+      <span class="feat-icon">📱</span>
+      <div class="feat-title">Native Flutter App</div>
+      <div class="feat-desc">Full native Android app — both PS1 & PS2, no WebView, pure Dart.</div>
+      <div class="feat-badge">App</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<div style="border-top:1px solid rgba(255,255,255,0.06);">
+  <footer>
+    <div class="foot-logo">🏏 IPL AI Suite</div>
+    <div class="foot-copy">GDG Hackathon 2026 · Built with Gemini Flash & Firebase</div>
+    <div class="foot-links">
+      <a href="aki-cricket.html" class="foot-link">Aki-Cricket</a>
+      <a href="watch-party.html" class="foot-link">Watch Party</a>
+    </div>
+  </footer>
+</div>
+</div><!-- /page -->
+
+<script src="js/key.js"></script>
+<script src="js/gemini.js"></script>
+<script src="js/firebase.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ── THREE.JS PREMIUM SCENE ─────────────────────────────────────────
+(function initThree(){
+  const canvas = document.getElementById('bg-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha:false, antialias:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setClearColor(0x060B18, 1); // force dark background
+
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
+  cam.position.z = 6;
+
+  // ── Icosahedron wireframe (main 3D hero element) ──
+  const icoGeo = new THREE.IcosahedronGeometry(2.2, 1);
+  const icoMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, wireframe: true, transparent: true, opacity: 0.06 });
+  const ico = new THREE.Mesh(icoGeo, icoMat);
+  ico.position.set(3.5, 0, -2);
+  scene.add(ico);
+
+  // ── Outer ring wireframe ──
+  const ringGeo = new THREE.TorusGeometry(3.0, 0.012, 6, 80);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.07 });
+  const ring1 = new THREE.Mesh(ringGeo, ringMat);
+  ring1.position.set(3.5, 0, -2);
+  ring1.rotation.x = Math.PI / 3;
+  scene.add(ring1);
+
+  const ring2 = new THREE.Mesh(
+    new THREE.TorusGeometry(2.6, 0.008, 6, 80),
+    new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.05 })
+  );
+  ring2.position.set(3.5, 0, -2);
+  ring2.rotation.x = Math.PI / 5;
+  ring2.rotation.y = Math.PI / 4;
+  scene.add(ring2);
+
+  // ── Gold ring on left ──
+  const ring3 = new THREE.Mesh(
+    new THREE.TorusGeometry(1.8, 0.01, 6, 60),
+    new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.05 })
+  );
+  ring3.position.set(-4, 1, -3);
+  scene.add(ring3);
+
+  // ── Particles ──
+  const N = 1200;
+  const pos = new Float32Array(N * 3);
+  const col = new Float32Array(N * 3);
+  const palette = [
+    [0, 0.831, 1],       // blue
+    [1, 0.843, 0],       // gold
+    [0.545, 0.361, 0.965], // purple
+    [0, 1, 0.533],       // green
+  ];
+  for (let i = 0; i < N; i++) {
+    // Generate strictly on the sides (left half x < -2.8 or right half x > 2.8)
+    const side = Math.random() < 0.5 ? -1 : 1;
+    pos[i*3]   = side * (2.8 + Math.random() * 8.5);
+    pos[i*3+1] = (Math.random() - 0.5) * 22;
+    pos[i*3+2] = (Math.random() - 0.5) * 10;
+    const c = palette[Math.floor(Math.random() * palette.length)];
+    col[i*3] = c[0]; col[i*3+1] = c[1]; col[i*3+2] = c[2];
+  }
+  const ptGeo = new THREE.BufferGeometry();
+  ptGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  ptGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const pts = new THREE.Points(ptGeo, new THREE.PointsMaterial({
+    size: 0.04, vertexColors: true, transparent: true, opacity: 0.55,
+  }));
+  scene.add(pts);
+
+  // ── Small orbiting sphere ──
+  const orbGeo = new THREE.SphereGeometry(0.18, 16, 16);
+  const orbMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.55 });
+  const orb1 = new THREE.Mesh(orbGeo, orbMat);
+  scene.add(orb1);
+
+  const orb2 = new THREE.Mesh(
+    new THREE.SphereGeometry(0.12, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.45 })
+  );
+  scene.add(orb2);
+
+  let mx = 0, my = 0;
+  document.addEventListener('mousemove', e => {
+    mx = (e.clientX / innerWidth - 0.5) * 2;
+    my = (e.clientY / innerHeight - 0.5) * 2;
+  });
+
+  window.addEventListener('resize', () => {
+    renderer.setSize(innerWidth, innerHeight);
+    cam.aspect = innerWidth / innerHeight;
+    cam.updateProjectionMatrix();
+  });
+
+  let t = 0;
+  (function loop(){
+    requestAnimationFrame(loop);
+    t += 0.007;
+
+    // Responsive positioning and auto-hiding
+    const isMobile = window.innerWidth < 768;
+    ico.visible = !isMobile;
+    ring1.visible = !isMobile;
+    ring2.visible = !isMobile;
+    ring3.visible = !isMobile;
+    orb1.visible = !isMobile;
+    orb2.visible = !isMobile;
+
+    const aspect = window.innerWidth / window.innerHeight;
+    const targetX = aspect > 1.5 ? 3.8 : 2.8;
+    const leftX = aspect > 1.5 ? -4.2 : -3.2;
+
+    ico.position.x = targetX;
+    ring1.position.x = targetX;
+    ring2.position.x = targetX;
+    ring3.position.x = leftX;
+
+    // Rotate icosahedron
+    ico.rotation.x = t * 0.15;
+    ico.rotation.y = t * 0.22;
+    ring1.rotation.x = Math.PI/3 + t * 0.18;
+    ring1.rotation.z = t * 0.12;
+    ring2.rotation.y = t * 0.25;
+    ring2.rotation.z = t * 0.1;
+    ring3.rotation.x = t * 0.2;
+    ring3.rotation.y = t * 0.15;
+
+    // Orbit small spheres around the icosahedron
+    orb1.position.set(
+      targetX + Math.cos(t * 0.9) * 2.8,
+      Math.sin(t * 0.7) * 1.6,
+      -2 + Math.sin(t * 0.9) * 1.2
+    );
+    orb2.position.set(
+      targetX + Math.cos(t * 0.6 + Math.PI) * 3.2,
+      Math.sin(t * 0.5 + Math.PI) * 2.0,
+      -2 + Math.cos(t * 0.6) * 1.5
+    );
+
+    // Particles drift
+    pts.rotation.y = t * 0.04 + mx * 0.08;
+    pts.rotation.x = my * 0.04;
+
+    // Camera parallax
+    cam.position.x += (mx * 0.3 - cam.position.x) * 0.04;
+    cam.position.y += (-my * 0.2 - cam.position.y) * 0.04;
+
+    renderer.render(scene, cam);
+  })();
+})();
+
+// ── GSAP Entrance Animations ─────────────────────────────────────
+gsap.from('nav', { y: -30, opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.1 });
+gsap.from('.hero-badge',   { y: 24, opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.3 });
+gsap.from('.hero h1',      { y: 40, opacity: 0, duration: 0.8, ease: 'power3.out', delay: 0.45 });
+gsap.from('.hero p',       { y: 30, opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.6 });
+gsap.from('.hero-btns',    { y: 24, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.75 });
+gsap.from('.hero-stats',   { y: 20, opacity: 0, duration: 0.6, ease: 'power3.out', delay: 0.9 });
+
+gsap.from('.ps-card', { scrollTrigger:{ trigger:'.ps-grid', start:'top 80%' }, y: 50, opacity: 0, stagger: 0.15, duration: 0.8, ease: 'power3.out' });
+gsap.from('.feat-card', { scrollTrigger:{ trigger:'.feat-grid', start:'top 80%' }, y: 30, opacity: 0, stagger: 0.07, duration: 0.6, ease: 'power2.out' });
+
+// VanillaTilt
+VanillaTilt.init(document.querySelectorAll('[data-tilt]'), { max: 6, speed: 600, glare: true, 'max-glare': 0.1 });
+
+// Magnetic buttons
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const r = btn.getBoundingClientRect();
+    gsap.to(btn, { x: (e.clientX - r.left - r.width/2) * 0.18, y: (e.clientY - r.top - r.height/2) * 0.18, duration: 0.3 });
+  });
+  btn.addEventListener('mouseleave', () => gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1,0.5)' }));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aki-Cricket — AI IPL Akinator | Gemini Flash</title>
+  <meta name="description" content="Think of any IPL player, team or match. Gemini AI has 15 questions to guess it."/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+<style>
+/* ── BASE ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Outfit',sans-serif;
+  background:#060B18; color:#fff;
+  overflow-x:hidden; min-height:100vh;
+}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:#060B18}
+::-webkit-scrollbar-thumb{background:#00d4ff44;border-radius:3px}
+
+/* ── 3D CANVAS ── */
+#bg-canvas{
+  position:fixed;inset:0;z-index:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  background:#060B18;
+}
+
+/* ── NAV ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:0 48px;height:68px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(6,11,24,0.8);
+  backdrop-filter:blur(28px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.nav-logo{
+  font-weight:900;font-size:1.2rem;text-decoration:none;
+  background:linear-gradient(135deg,#00d4ff,#ffd700);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.nav-links{display:flex;gap:4px;align-items:center}
+.nav-link{
+  color:rgba(255,255,255,0.5);text-decoration:none;
+  font-size:0.88rem;font-weight:600;padding:7px 16px;
+  border-radius:50px;transition:all 0.2s;
+}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,0.07)}
+.nav-link.active{color:#00d4ff;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.18)}
+
+/* ── LAYOUT ── */
+.page{position:relative;z-index:1}
+.game-root{
+  display:grid;
+  grid-template-columns:1fr 320px;
+  gap:24px;
+  max-width:1180px;margin:0 auto;
+  padding:92px 24px 40px;
+  min-height:100vh;
+  align-items:start;
+}
+@media(max-width:960px){.game-root{grid-template-columns:1fr}.sidebar{display:none}}
+
+/* ── HERO BANNER ── */
+.hero-banner{
+  position:relative;border-radius:24px;overflow:hidden;
+  height:200px;margin-bottom:24px;
+  border:1px solid rgba(0,212,255,0.1);
+}
+.hero-banner img{
+  width:100%;height:100%;object-fit:cover;object-position:center 20%;
+  filter:brightness(0.35) saturate(1.5);
+}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,212,255,0.12) 0%,rgba(6,11,24,0.5) 50%,rgba(139,92,246,0.1) 100%);
+  display:flex;align-items:center;padding:28px 32px;gap:22px;
+}
+/* Floating Aki avatar with glow ring */
+.aki-avatar-wrap{position:relative;width:96px;height:96px;flex-shrink:0}
+.aki-avatar-img{
+  width:96px;height:96px;border-radius:50%;
+  object-fit:cover;border:2px solid rgba(0,212,255,0.5);
+  box-shadow:0 0 40px rgba(0,212,255,0.35);
+  animation:floatAvatar 3.5s ease-in-out infinite;
+}
+@keyframes floatAvatar{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.aki-ring{
+  position:absolute;inset:-10px;border-radius:50%;
+  border:1.5px dashed rgba(0,212,255,0.35);
+  animation:spin 7s linear infinite;
+}
+.aki-ring-2{
+  position:absolute;inset:-18px;border-radius:50%;
+  border:1px dashed rgba(255,215,0,0.2);
+  animation:spin 12s linear infinite reverse;
+}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+
+.hero-text h1{font-size:1.9rem;font-weight:900;letter-spacing:-0.03em;margin-bottom:4px}
+.hero-text p{color:rgba(255,255,255,0.5);font-size:0.88rem}
+.hero-badges{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+
+/* ── CATEGORY SELECTOR ── */
+.cat-wrap{display:flex;gap:10px;margin-bottom:20px}
+.cat-btn{
+  flex:1;padding:13px 10px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;color:rgba(255,255,255,0.45);
+  font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:700;
+  cursor:pointer;transition:all 0.25s;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+}
+.cat-btn .ci{font-size:1.4rem}
+.cat-btn:hover,.cat-btn.active{
+  border-color:rgba(0,212,255,0.45);
+  background:rgba(0,212,255,0.07);
+  color:#00d4ff;
+  box-shadow:0 0 20px rgba(0,212,255,0.1);
+  transform:translateY(-2px);
+}
+
+/* ── GAME HEADER ── */
+.game-hdr{
+  background:rgba(255,255,255,0.025);
+  backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:20px;padding:20px 22px;
+  display:flex;align-items:center;gap:18px;
+  margin-bottom:16px;
+}
+.aki-face-wrap{position:relative;width:68px;height:68px;flex-shrink:0}
+.aki-face{
+  width:68px;height:68px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;
+  background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(139,92,246,0.1));
+  border:2px solid rgba(0,212,255,0.3);
+  transition:all 0.5s;
+}
+.aki-face.confident{border-color:#00d4ff;box-shadow:0 0 24px rgba(0,212,255,0.4)}
+.aki-face.focused  {border-color:#8b5cf6;box-shadow:0 0 24px rgba(139,92,246,0.4)}
+.aki-face.tense    {border-color:#f97316;box-shadow:0 0 24px rgba(249,115,22,0.4)}
+.aki-face.dramatic {border-color:#ff4060;box-shadow:0 0 24px rgba(255,64,96,0.4);animation:dramaticPulse 0.7s ease infinite}
+.aki-face.defeated {border-color:rgba(255,255,255,0.2);filter:grayscale(0.6)}
+@keyframes dramaticPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+
+.fring{position:absolute;inset:-7px;border-radius:50%;border:1.5px dashed rgba(0,212,255,0.3);animation:spin 6s linear infinite}
+.fring2{position:absolute;inset:-14px;border-radius:50%;border:1px dashed rgba(255,215,0,0.15);animation:spin 10s linear infinite reverse}
+
+.game-meta{flex:1}
+.game-meta h2{font-size:1.2rem;font-weight:800;margin-bottom:2px}
+.aki-mood{font-size:0.78rem;color:rgba(255,255,255,0.45);font-style:italic;margin-bottom:8px;min-height:16px;transition:all 0.3s}
+
+/* Q-dots */
+.q-dots{display:flex;gap:5px;flex-wrap:wrap}
+.q-dot{
+  width:11px;height:11px;border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  transition:all 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.q-dot.yes{background:#00ff88;box-shadow:0 0 6px #00ff88;transform:scale(1.1)}
+.q-dot.no {background:#ff4060;box-shadow:0 0 6px #ff4060;transform:scale(1.1)}
+.q-dot.cur{background:#00d4ff;box-shadow:0 0 12px #00d4ff;transform:scale(1.35);animation:dotPulse 1s infinite}
+@keyframes dotPulse{0%,100%{box-shadow:0 0 8px #00d4ff}50%{box-shadow:0 0 20px #00d4ff}}
+
+/* Timer */
+.timer-box{text-align:right;flex-shrink:0}
+.timer-val{
+  font-size:1.7rem;font-weight:900;font-family:'Inter',monospace;
+  color:#00d4ff;transition:color 0.3s;
+  text-shadow:0 0 20px rgba(0,212,255,0.5);
+  letter-spacing:-0.03em;
+}
+.timer-val.warn{color:#f97316;text-shadow:0 0 20px rgba(249,115,22,0.5)}
+.timer-val.danger{color:#ff4060;text-shadow:0 0 20px rgba(255,64,96,0.5);animation:timerPanic 0.4s ease infinite}
+@keyframes timerPanic{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* Progress arc SVG */
+.arc-svg{width:48px;height:48px;margin:0 auto}
+
+/* ── CHAT AREA ── */
+.chat-area{
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:20px;padding:18px;
+  height:360px;overflow-y:auto;
+  display:flex;flex-direction:column;gap:12px;
+  margin-bottom:16px;
+  scroll-behavior:smooth;
+}
+.chat-area::-webkit-scrollbar{width:3px}
+.chat-area::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.25);border-radius:2px}
+
+.msg-row{display:flex;gap:10px;align-items:flex-start;animation:msgIn 0.3s cubic-bezier(0.4,0,0.2,1)}
+@keyframes msgIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.msg-av{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+  background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);
+}
+.msg-body{flex:1}
+.msg-name{font-size:0.68rem;font-weight:700;color:#00d4ff;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px}
+.msg-bubble{
+  background:linear-gradient(135deg,rgba(0,212,255,0.06),rgba(139,92,246,0.06));
+  border:1px solid rgba(0,212,255,0.12);
+  border-radius:14px 14px 14px 3px;
+  padding:11px 15px;font-size:0.92rem;line-height:1.55;
+}
+.msg-thought{font-size:0.7rem;color:rgba(255,255,255,0.35);font-style:italic;margin-top:4px;padding-left:2px}
+
+.user-row{flex-direction:row-reverse}
+.user-bubble{
+  background:linear-gradient(135deg,rgba(255,215,0,0.09),rgba(255,64,96,0.07));
+  border:1px solid rgba(255,215,0,0.18);
+  border-radius:14px 14px 3px 14px;
+  padding:11px 16px;font-size:0.92rem;font-weight:700;
+  display:inline-block;max-width:160px;
+}
+
+/* Thinking dots */
+.think-row{display:flex;gap:10px;align-items:center;padding:10px 14px;background:rgba(0,212,255,0.03);border:1px solid rgba(0,212,255,0.08);border-radius:14px;width:fit-content}
+.td{width:6px;height:6px;border-radius:50%;background:#00d4ff;animation:td 1.2s ease-in-out infinite}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,80%,100%{transform:translateY(0);opacity:0.3}40%{transform:translateY(-7px);opacity:1}}
+
+/* ── ANSWER PANEL ── */
+.ans-panel{
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:20px;padding:20px;
+}
+.ans-prompt{font-size:0.82rem;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:14px;letter-spacing:0.03em}
+.yn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.yn-btn{
+  padding:18px;border-radius:14px;
+  font-size:1rem;font-weight:800;cursor:pointer;
+  border:2px solid;font-family:'Outfit',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+  position:relative;overflow:hidden;
+}
+.yn-yes{color:#00ff88;border-color:rgba(0,255,136,0.3);background:rgba(0,255,136,0.05)}
+.yn-no {color:#ff4060;border-color:rgba(255,64,96,0.3);background:rgba(255,64,96,0.05)}
+.yn-btn:hover:not(:disabled){transform:translateY(-3px) scale(1.03)}
+.yn-yes:hover:not(:disabled){box-shadow:0 8px 28px rgba(0,255,136,0.2);background:rgba(0,255,136,0.1);border-color:#00ff88}
+.yn-no:hover:not(:disabled) {box-shadow:0 8px 28px rgba(255,64,96,0.2);background:rgba(255,64,96,0.1);border-color:#ff4060}
+.yn-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none}
+.yn-btn:active:not(:disabled){transform:scale(0.96)}
+
+.start-btn{
+  width:100%;padding:16px;border-radius:14px;
+  background:linear-gradient(135deg,#00d4ff,#0088cc);
+  color:#060B18;font-family:'Outfit',sans-serif;font-weight:800;font-size:1rem;
+  border:none;cursor:pointer;
+  box-shadow:0 0 28px rgba(0,212,255,0.3);
+  transition:all 0.25s;
+}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 0 42px rgba(0,212,255,0.45)}
+.start-btn:active{transform:scale(0.97)}
+
+/* ── SIDEBAR ── */
+.sidebar{display:flex;flex-direction:column;gap:18px;position:sticky;top:90px}
+.side-card{
+  background:rgba(255,255,255,0.025);
+  backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:18px;padding:20px;
+}
+.side-card h3{
+  font-size:0.73rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;
+  color:rgba(255,255,255,0.4);margin-bottom:14px;
+  display:flex;align-items:center;gap:7px;
+}
+
+/* Leaderboard */
+.lb-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;background:rgba(255,255,255,0.05);flex-shrink:0}
+.lb-rank.gold{background:linear-gradient(135deg,#ffd700,#cc9900);color:#060B18}
+.lb-name{flex:1;font-size:0.85rem;font-weight:600}
+.lb-val{font-size:0.78rem;color:#00d4ff;font-weight:700}
+
+/* Stats */
+.stats-4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-box{
+  background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.1);
+  border-radius:12px;padding:12px;text-align:center;
+}
+.stat-box.gold-b{background:rgba(255,215,0,0.04);border-color:rgba(255,215,0,0.1)}
+.sv{font-size:1.55rem;font-weight:900;display:block;letter-spacing:-0.03em}
+.sk{font-size:0.65rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px}
+
+/* Aki photo card */
+.aki-photo-card{text-align:center;padding:14px}
+.aki-photo-card img{width:100%;border-radius:14px;filter:brightness(0.85) saturate(1.4);transition:filter 0.3s;animation:ballSpin3 20s linear infinite}
+@keyframes ballSpin3{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.aki-photo-card:hover img{filter:brightness(0.95) saturate(1.6)}
+
+/* ── MODAL ── */
+.modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(6,11,24,0.88);
+  backdrop-filter:blur(28px);
+  z-index:500;align-items:center;justify-content:center;
+}
+.modal-bg.open{display:flex}
+.modal-card{
+  background:#0d1526;
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:28px;padding:44px 36px;
+  max-width:460px;width:90%;text-align:center;
+  animation:modalIn 0.45s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 40px 80px rgba(0,0,0,0.5);
+}
+@keyframes modalIn{from{opacity:0;transform:scale(0.82) translateY(36px)}to{opacity:1;transform:none}}
+.mo-emoji{font-size:4rem;display:block;margin-bottom:16px;animation:emojiIn 0.55s cubic-bezier(0.4,0,0.2,1) 0.15s both}
+@keyframes emojiIn{from{transform:scale(0) rotate(-18deg)}to{transform:none}}
+.mo-title{font-size:1.75rem;font-weight:900;letter-spacing:-0.03em;margin-bottom:8px}
+.mo-desc{color:rgba(255,255,255,0.45);font-family:'Inter',sans-serif;font-size:0.9rem;line-height:1.65;margin-bottom:20px}
+.mo-stats{display:flex;justify-content:center;gap:40px;margin-bottom:24px}
+.ms-val{font-size:2rem;font-weight:900;display:block;letter-spacing:-0.04em}
+.ms-key{font-size:0.68rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.08em}
+.confirm-row{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
+.name-input{
+  width:100%;padding:12px 18px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);
+  border-radius:12px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.9rem;
+  outline:none;margin-bottom:12px;transition:border-color 0.2s;
+}
+.name-input:focus{border-color:#00d4ff}
+.name-input::placeholder{color:rgba(255,255,255,0.3)}
+
+/* Generic buttons */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 24px;border-radius:50px;
+  font-family:'Outfit',sans-serif;font-weight:700;font-size:0.9rem;
+  cursor:pointer;border:none;outline:none;
+  text-decoration:none;transition:all 0.2s;position:relative;overflow:hidden;
+}
+.btn-primary{background:linear-gradient(135deg,#00d4ff,#0088cc);color:#060B18;box-shadow:0 0 24px rgba(0,212,255,0.3)}
+.btn-gold   {background:linear-gradient(135deg,#ffd700,#cc9900);color:#060B18;box-shadow:0 0 24px rgba(255,215,0,0.3)}
+.btn-coral  {background:linear-gradient(135deg,#ff4060,#cc2244);color:#fff;box-shadow:0 0 24px rgba(255,64,96,0.3)}
+.btn-ghost  {background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.1)}
+.btn-ghost:hover{color:#fff;border-color:rgba(0,212,255,0.3)}
+.btn:hover:not(:disabled){transform:translateY(-1px)}
+.btn:active:not(:disabled){transform:scale(0.97)}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:50px;font-size:0.74rem;font-weight:700;letter-spacing:0.04em}
+.badge-blue  {background:rgba(0,212,255,0.1);color:#00d4ff;border:1px solid rgba(0,212,255,0.25)}
+.badge-gold  {background:rgba(255,215,0,0.1);color:#ffd700;border:1px solid rgba(255,215,0,0.25)}
+.badge-green {background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid rgba(0,255,136,0.25)}
+
+/* Gradient text */
+.g-blue{background:linear-gradient(135deg,#00d4ff,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.g-gold{background:linear-gradient(135deg,#ffd700,#ff4060);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Progress bar */
+.prog-bar{height:6px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;margin-top:6px;width:200px}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#00d4ff,#8b5cf6);transition:width 0.5s cubic-bezier(0.4,0,0.2,1);box-shadow:0 0 8px rgba(0,212,255,0.5)}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<div class="page">
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">🏏 IPL AI Suite</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="aki-cricket.html" class="nav-link active">Aki-Cricket</a>
+    <a href="watch-party.html" class="nav-link">Watch Party</a>
+  </div>
+</nav>
+
+<div class="game-root">
+  <!-- ══ MAIN ══ -->
+  <div>
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <img src="assets/aki_character.png" alt="Aki"/>
+      <div class="hero-overlay">
+        <div class="aki-avatar-wrap">
+          <img src="assets/aki_character.png" alt="Aki" class="aki-avatar-img"/>
+          <div class="aki-ring"></div>
+          <div class="aki-ring-2"></div>
+        </div>
+        <div class="hero-text">
+          <h1>Aki-<span class="g-blue">Cricket</span></h1>
+          <p>The AI oracle that reads IPL minds in ≤15 questions</p>
+          <div class="hero-badges">
+            <span class="badge badge-blue">✨ Gemini Flash</span>
+            <span class="badge badge-gold">🔥 Firebase</span>
+            <span class="badge badge-green">⏱️ 2-Min Timer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Selector -->
+    <div class="cat-wrap" id="cat-wrap">
+      <button class="cat-btn active" id="cat-player" onclick="setCategory('player',this)"><span class="ci">🧑</span>Player</button>
+      <button class="cat-btn" id="cat-team"  onclick="setCategory('team',this)"><span class="ci">🏟️</span>Team</button>
+      <button class="cat-btn" id="cat-match" onclick="setCategory('match',this)"><span class="ci">🏆</span>Match</button>
+    </div>
+
+    <!-- Game Header -->
+    <div class="game-hdr">
+      <div class="aki-face-wrap">
+        <div class="aki-face confident" id="aki-face">😏</div>
+        <div class="fring"></div>
+        <div class="fring2"></div>
+      </div>
+      <div class="game-meta">
+        <h2>AI Oracle · <span class="g-blue" id="q-counter">0/15</span></h2>
+        <div class="aki-mood" id="aki-mood">I can read cricket minds... especially IPL ones. 😏</div>
+        <div class="q-dots" id="q-dots"></div>
+        <div class="prog-bar"><div class="prog-fill" id="q-prog" style="width:0%"></div></div>
+      </div>
+      <div class="timer-box">
+        <div class="timer-val" id="timer">2:00</div>
+        <svg class="arc-svg" viewBox="0 0 50 50">
+          <circle cx="25" cy="25" r="20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+          <circle cx="25" cy="25" r="20" fill="none" stroke="#00d4ff" stroke-width="3"
+            stroke-dasharray="125.6" stroke-dashoffset="0" id="arc-timer"
+            stroke-linecap="round" transform="rotate(-90 25 25)" style="transition:stroke-dashoffset 1s linear,stroke 0.3s"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat-area" id="chat">
+      <div class="msg-row">
+        <div class="msg-av">😏</div>
+        <div class="msg-body">
+          <div class="msg-name">🤖 Aki · Gemini Flash</div>
+          <div class="msg-bubble">Welcome! Think of an IPL <strong>player, team, or historic match</strong> — I'll guess it in ≤15 questions using my Gemini AI engine.<br/><br/>Pick a category, then hit <strong>Start Game</strong>. I rarely fail. 😏</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Answer Panel -->
+    <div class="ans-panel">
+      <div class="ans-prompt" id="ans-prompt">Pick a category above and start the game!</div>
+      <div class="yn-grid">
+        <button class="yn-btn yn-yes" id="btn-yes" onclick="submitAnswer(true)" disabled>✅ YES</button>
+        <button class="yn-btn yn-no"  id="btn-no"  onclick="submitAnswer(false)" disabled>❌ NO</button>
+      </div>
+      <button class="start-btn" id="btn-start" onclick="startGame()">🎮 Start Game</button>
+    </div>
+  </div>
+
+  <!-- ══ SIDEBAR ══ -->
+  <div class="sidebar">
+    <!-- How to play -->
+    <div class="side-card" data-tilt data-tilt-max="4" data-tilt-speed="400">
+      <h3>📖 How to Play</h3>
+      <ol style="color:rgba(255,255,255,0.45);font-size:0.84rem;line-height:1.9;padding-left:18px;font-family:'Inter',sans-serif">
+        <li>Pick a <strong style="color:#fff">category</strong></li>
+        <li>Think of something IPL</li>
+        <li>Press <strong style="color:#00ff88">Start Game</strong></li>
+        <li>Answer <strong style="color:#00ff88">YES</strong> / <strong style="color:#ff4060">NO</strong> honestly</li>
+        <li>Stump Gemini in &lt;15 Qs!</li>
+      </ol>
+      <div style="height:1px;background:rgba(255,255,255,0.05);margin:16px 0"></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <span class="badge badge-blue">🧠 Gemini Flash</span>
+        <span class="badge badge-gold">⏱️ 2 Min</span>
+      </div>
+    </div>
+
+    <!-- My Stats -->
+    <div class="side-card" data-tilt data-tilt-max="4">
+      <h3>📊 My Stats</h3>
+      <div class="stats-4">
+        <div class="stat-box"><span class="sv g-blue" id="stat-streak">0</span><div class="sk">Streak 🔥</div></div>
+        <div class="stat-box gold-b"><span class="sv g-gold" id="stat-played">0</span><div class="sk">Games</div></div>
+        <div class="stat-box"><span class="sv" style="color:#00ff88" id="stat-wins">0</span><div class="sk">I Won</div></div>
+        <div class="stat-box gold-b"><span class="sv" style="color:#ff4060" id="stat-losses">0</span><div class="sk">AI Won</div></div>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="side-card" data-tilt data-tilt-max="4">
+      <h3>🏆 Firebase Leaderboard</h3>
+      <div id="lb-list"><div style="color:rgba(255,255,255,0.3);font-size:0.8rem;text-align:center;padding:14px 0">No scores yet — be the first! 🚀</div></div>
+      <div style="height:1px;background:rgba(255,255,255,0.05);margin:14px 0"></div>
+      <span class="badge badge-gold" style="font-size:0.7rem">🔥 Synced via Firebase</span>
+    </div>
+
+    <!-- Cricket ball 3D -->
+    <div class="side-card aki-photo-card" data-tilt data-tilt-max="10" data-tilt-glare="true">
+      <img src="assets/cricket_ball_3d.png" alt="3D Cricket Ball"/>
+      <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);margin-top:10px">Powered by Gemini Flash AI 🤖</div>
+    </div>
+  </div>
+</div>
+</div><!-- /page -->
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal-card">
+    <span class="mo-emoji" id="mo-emoji">🎭</span>
+    <div class="mo-title" id="mo-title">Loading...</div>
+    <div class="mo-desc" id="mo-desc">...</div>
+    <div class="mo-stats">
+      <div><span class="ms-val g-blue" id="mo-q">-</span><div class="ms-key">Questions</div></div>
+      <div><span class="ms-val g-gold" id="mo-t">-</span><div class="ms-key">Seconds</div></div>
+    </div>
+    <div id="confirm-wrap" style="display:none">
+      <p style="font-size:0.85rem;color:rgba(255,255,255,0.4);margin-bottom:12px">Was Aki right?</p>
+      <div class="confirm-row">
+        <button class="btn btn-primary" onclick="confirmResult(true)">✅ Yes!</button>
+        <button class="btn btn-coral" onclick="confirmResult(false)">❌ Nope!</button>
+      </div>
+    </div>
+    <div id="save-wrap" style="display:none">
+      <input type="text" class="name-input" id="player-name" placeholder="Your name for leaderboard..." maxlength="20"/>
+      <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="saveScore()">💾 Save to Firebase</button>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:12px" onclick="closeModal()">🔄 Play Again</button>
+  </div>
+</div>
+
+<script src="js/key.js"></script>
+<script src="js/gemini.js"></script>
+<script src="js/firebase.js"></script>
+<script src="js/aki-cricket.js"></script>
+<script>
+// ── THREE.JS SCENE ─────────────────────────────────────────────
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const R = new THREE.WebGLRenderer({canvas, alpha:false, antialias:true});
+  R.setPixelRatio(Math.min(devicePixelRatio,2));
+  R.setSize(innerWidth,innerHeight);
+  R.setClearColor(0x060B18,1);
+  const S = new THREE.Scene();
+  const C = new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,1000);
+  C.position.z=6;
+
+  // Big wireframe icosahedron — right side
+  const icoM = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(2.4,1),
+    new THREE.MeshBasicMaterial({color:0x00d4ff,wireframe:true,transparent:true,opacity:0.05})
+  );
+  icoM.position.set(4,0,-2); S.add(icoM);
+
+  // Orbit rings
+  const mkRing=(r,col,op)=>{
+    const m = new THREE.Mesh(new THREE.TorusGeometry(r,0.013,8,80), new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op}));
+    return m;
+  };
+  const r1=mkRing(3.0,0x00d4ff,0.07); r1.position.set(4,0,-2); r1.rotation.x=Math.PI/3; S.add(r1);
+  const r2=mkRing(2.5,0x8b5cf6,0.05); r2.position.set(4,0,-2); r2.rotation.x=Math.PI/5; r2.rotation.y=Math.PI/4; S.add(r2);
+  const r3=mkRing(1.6,0xffd700,0.05); r3.position.set(-4,1,-3); S.add(r3);
+
+  // Particles
+  const N=1400; const pos=new Float32Array(N*3); const col_=new Float32Array(N*3);
+  const pal=[[0,0.83,1],[1,0.84,0],[0.54,0.36,0.96],[0,1,0.53]];
+  for(let i=0;i<N;i++){
+    // Generate strictly on the sides (left half x < -2.8 or right half x > 2.8)
+    const side = Math.random() < 0.5 ? -1 : 1;
+    pos[i*3]=side * (2.8 + Math.random() * 8.5); pos[i*3+1]=(Math.random()-.5)*24; pos[i*3+2]=(Math.random()-.5)*10;
+    const c=pal[i%4]; col_[i*3]=c[0];col_[i*3+1]=c[1];col_[i*3+2]=c[2];
+  }
+  const ptG=new THREE.BufferGeometry();
+  ptG.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  ptG.setAttribute('color',new THREE.BufferAttribute(col_,3));
+  const pts=new THREE.Points(ptG,new THREE.PointsMaterial({size:0.038,vertexColors:true,transparent:true,opacity:0.5}));
+  S.add(pts);
+
+  // Orbiting spheres
+  const mkSph=(r,col,op)=>new THREE.Mesh(new THREE.SphereGeometry(r,16,16),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op}));
+  const s1=mkSph(0.16,0x00d4ff,0.6); S.add(s1);
+  const s2=mkSph(0.11,0xffd700,0.5); S.add(s2);
+  const s3=mkSph(0.09,0x8b5cf6,0.5); S.add(s3);
+
+  let mx=0,my=0;
+  document.addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2;});
+  window.addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix();});
+
+  let t=0;
+  (function loop(){
+    requestAnimationFrame(loop); t+=0.008;
+
+    // Responsive positioning and auto-hiding
+    const isMobile = window.innerWidth < 768;
+    icoM.visible = !isMobile;
+    r1.visible = !isMobile;
+    r2.visible = !isMobile;
+    r3.visible = !isMobile;
+    s1.visible = !isMobile;
+    s2.visible = !isMobile;
+    s3.visible = !isMobile;
+
+    const aspect = window.innerWidth / window.innerHeight;
+    const targetX = aspect > 1.5 ? 4.0 : 3.0;
+    const leftX = aspect > 1.5 ? -4.2 : -3.2;
+
+    icoM.position.x = targetX;
+    r1.position.x = targetX;
+    r2.position.x = targetX;
+    r3.position.x = leftX;
+
+    icoM.rotation.x=t*.14; icoM.rotation.y=t*.2;
+    r1.rotation.x=Math.PI/3+t*.18; r1.rotation.z=t*.1;
+    r2.rotation.y=t*.22; r2.rotation.z=t*.08;
+    r3.rotation.x=t*.18; r3.rotation.y=t*.13;
+
+    // orbiting spheres around icosahedron
+    s1.position.set(targetX+Math.cos(t*.8)*2.9, Math.sin(t*.6)*1.7, -2+Math.sin(t*.8)*1.3);
+    s2.position.set(targetX+Math.cos(t*.55+Math.PI)*3.3, Math.sin(t*.45+Math.PI)*2.1, -2+Math.cos(t*.55)*1.6);
+    s3.position.set(targetX+Math.sin(t*.7+1)*2.5, Math.cos(t*.9+2)*1.4, -2+Math.sin(t*.7+1)*2.0);
+
+    pts.rotation.y=t*.035+mx*.06; pts.rotation.x=my*.03;
+    C.position.x+=(mx*.3-C.position.x)*.04;
+    C.position.y+=(-my*.2-C.position.y)*.04;
+    R.render(S,C);
+  })();
+})();
+
+// ── GSAP Entrance ────────────────────────────────────────────────
+gsap.from('nav',{y:-28,opacity:0,duration:0.7,ease:'power3.out'});
+gsap.from('.hero-banner',{y:40,opacity:0,duration:0.8,ease:'power3.out',delay:0.15});
+gsap.from('.cat-wrap',{y:24,opacity:0,duration:0.6,ease:'power2.out',delay:0.35});
+gsap.from('.game-hdr',{y:20,opacity:0,duration:0.6,ease:'power2.out',delay:0.5});
+gsap.from('.chat-area',{y:20,opacity:0,duration:0.6,ease:'power2.out',delay:0.65});
+gsap.from('.ans-panel',{y:20,opacity:0,duration:0.6,ease:'power2.out',delay:0.8});
+gsap.from('.side-card',{x:28,opacity:0,stagger:0.1,duration:0.7,ease:'power2.out',delay:0.4});
+
+VanillaTilt.init(document.querySelectorAll('[data-tilt]'),{max:5,speed:400,glare:true,'max-glare':0.08});
+
+// Magnetic buttons
+document.querySelectorAll('.btn,.yn-btn,.start-btn').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{
+    const r=btn.getBoundingClientRect();
+    gsap.to(btn,{x:(e.clientX-r.left-r.width/2)*.18,y:(e.clientY-r.top-r.height/2)*.18,duration:0.3});
+  });
+  btn.addEventListener('mouseleave',()=>gsap.to(btn,{x:0,y:0,duration:0.6,ease:'elastic.out(1,0.5)'}));
+});
+
+// ── GAME STATE ───────────────────────────────────────────────────
+let game=null, currentCat='player';
+let lastGuess='', lastAkiWon=false, lastElapsed=0;
+let streak=+localStorage.getItem('aki_streak')||0;
+let played=+localStorage.getItem('aki_played')||0;
+let wins=  +localStorage.getItem('aki_wins')||0;
+let losses=+localStorage.getItem('aki_losses')||0;
+
+function updateStatsUI(){
+  ['streak','played','wins','losses'].forEach(k=>document.getElementById('stat-'+k).textContent=eval(k));
+}
+updateStatsUI();
+
+function buildDots(){
+  const c=document.getElementById('q-dots'); c.innerHTML='';
+  for(let i=0;i<15;i++){const d=document.createElement('div');d.className='q-dot';d.id='d'+i;c.appendChild(d);}
+}
+buildDots();
+
+function setCategory(cat,el){
+  currentCat=cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  gsap.from(el,{scale:0.88,duration:0.35,ease:'back.out(2)'});
+}
+
+// ── Start ────────────────────────────────────────────────────────
+async function startGame(){
+  buildDots();
+  document.getElementById('chat').innerHTML='';
+  document.getElementById('btn-start').style.display='none';
+  document.getElementById('cat-wrap').style.pointerEvents='none';
+  document.getElementById('btn-yes').disabled=true;
+  document.getElementById('btn-no').disabled=true;
+  document.getElementById('ans-prompt').textContent='Gemini AI is formulating its first question...';
+  document.getElementById('q-counter').textContent='0/15';
+  document.getElementById('q-prog').style.width='0%';
+  setPersona('confident','Scanning the IPL universe... 🛸');
+  document.getElementById('d0').classList.add('cur');
+  addThink('think-start');
+  game=new AkiCricketGame();
+  game.onQuestion   =(parsed,qn,mx)=>{removeThink();updateQuestion(parsed,qn,mx);};
+  game.onGuess      =(data)=>{removeThink();handleEnd(data);};
+  game.onTimer      =(r)=>updateTimer(r);
+  game.onPersonaChange=(p)=>setPersona(p);
+  await db.incrementCounter('game_started');
+  await game.start();
+}
+
+function updateQuestion(parsed,qNum,maxQ){
+  if(qNum>1&&game.answers.length){
+    const last=game.answers[game.answers.length-1];
+    const pd=document.getElementById('d'+(last.q-1));
+    if(pd){pd.classList.remove('cur');pd.classList.add(last.answer==='Yes'?'yes':'no');}
+    const cd=document.getElementById('d'+(qNum-1));
+    if(cd) cd.classList.add('cur');
+  }
+  document.getElementById('q-counter').textContent=qNum+'/'+maxQ;
+  document.getElementById('q-prog').style.width=(qNum/maxQ*100)+'%';
+  const chat=document.getElementById('chat');
+  const el=document.createElement('div'); el.className='msg-row';
+  el.innerHTML=`<div class="msg-av">${getEmoji(parsed.persona)}</div>
+    <div class="msg-body">
+      <div class="msg-name">🤖 Aki · Gemini Flash · Q${qNum}</div>
+      <div class="msg-bubble">${parsed.question}</div>
+      ${parsed.thoughts?`<div class="msg-thought">💭 ${parsed.thoughts}</div>`:''}
+    </div>`;
+  chat.appendChild(el);
+  chat.scrollTop=chat.scrollHeight;
+  document.getElementById('ans-prompt').textContent='Answer honestly — Aki is watching 👀';
+  document.getElementById('btn-yes').disabled=false;
+  document.getElementById('btn-no').disabled=false;
+  gsap.from(el,{y:14,opacity:0,duration:0.35,ease:'power2.out'});
+}
+
+function getEmoji(p){return {confident:'😏',focused:'🧐',tense:'😰',dramatic:'😱',defeated:'😔'}[p]||'🧙';}
+function setPersona(p,text){
+  const f=document.getElementById('aki-face');
+  f.className='aki-face '+p; f.textContent=getEmoji(p);
+  if(text) document.getElementById('aki-mood').textContent=text;
+  else{
+    const m={confident:['Reading your mind... 😏','Narrowing down nicely.'],
+             focused:['Recalibrating... 🧐','Cross-referencing database...'],
+             tense:['This is trickier than I expected... 😰','My certainty is wavering!'],
+             dramatic:['EVERYTHING RIDES ON THIS! 😱','FINAL QUESTION INCOMING!'],
+             defeated:['You outsmarted me. 😔','Well played, human.']};
+    const opts=m[p]||m.confident;
+    document.getElementById('aki-mood').textContent=opts[Math.floor(Math.random()*opts.length)];
+  }
+  gsap.from(f,{scale:0.55,duration:0.45,ease:'back.out(2)'});
+}
+
+function addThink(id){
+  const chat=document.getElementById('chat');
+  const el=document.createElement('div'); el.className='msg-row'; el.id=id;
+  el.innerHTML=`<div class="msg-av">🧙</div><div class="msg-body"><div class="msg-name">🤖 Aki · Gemini Flash</div><div class="think-row"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>`;
+  chat.appendChild(el); chat.scrollTop=chat.scrollHeight;
+}
+function removeThink(){['think-start','think-ans'].forEach(id=>document.getElementById(id)?.remove());}
+
+async function submitAnswer(yes){
+  document.getElementById('btn-yes').disabled=true;
+  document.getElementById('btn-no').disabled=true;
+  document.getElementById('ans-prompt').textContent='Gemini AI is analyzing your answer...';
+  const chat=document.getElementById('chat');
+  const el=document.createElement('div'); el.className='user-row';
+  el.style.cssText='display:flex;justify-content:flex-end;padding:4px 0';
+  el.innerHTML=`<div class="user-bubble">${yes?'✅ YES':'❌ NO'}</div>`;
+  chat.appendChild(el); chat.scrollTop=chat.scrollHeight;
+  gsap.from(el,{x:20,opacity:0,duration:0.3});
+  addThink('think-ans');
+  await game.answer(yes);
+}
+
+function updateTimer(r){
+  const el=document.getElementById('timer');
+  const m=Math.floor(r/60),s=r%60;
+  el.textContent=m+':'+(s<10?'0':'')+s;
+  el.className='timer-val'+(r<=10?' danger':r<=30?' warn':'');
+  const arc=document.getElementById('arc-timer');
+  const offset=125.6*(1-r/120);
+  if(arc){arc.style.strokeDashoffset=offset;arc.style.stroke=r<=10?'#ff4060':r<=30?'#f97316':'#00d4ff';}
+}
+
+function handleEnd({guess,akiWon,elapsed,questions}){
+  lastGuess=guess||''; lastAkiWon=akiWon; lastElapsed=elapsed||0;
+  document.getElementById('mo-q').textContent=questions||'-';
+  document.getElementById('mo-t').textContent=elapsed||'-';
+  if(guess&&!akiWon){
+    document.getElementById('mo-emoji').textContent='🤔';
+    document.getElementById('mo-title').innerHTML=`Is it... <span class="g-blue">${guess}</span>?`;
+    document.getElementById('mo-desc').textContent='Was I right? Be completely honest!';
+    document.getElementById('confirm-wrap').style.display='block';
+    document.getElementById('save-wrap').style.display='none';
+  } else { finalizeEnd(akiWon,questions,elapsed); }
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function confirmResult(correct){document.getElementById('confirm-wrap').style.display='none';finalizeEnd(correct,game?.questionCount,lastElapsed);}
+
+function finalizeEnd(akiWon,questions,elapsed){
+  played++; localStorage.setItem('aki_played',played);
+  if(!akiWon){
+    wins++; streak++;
+    localStorage.setItem('aki_wins',wins); localStorage.setItem('aki_streak',streak);
+    document.getElementById('mo-emoji').textContent='🎉';
+    document.getElementById('mo-title').innerHTML=`You Win! <span class="g-gold">Genius! 🔥</span>`;
+    document.getElementById('mo-desc').textContent=`You stumped Gemini AI in ${questions} questions! Current streak: ${streak} 🔥`;
+    confetti({particleCount:180,spread:110,origin:{y:0.4},colors:['#00d4ff','#ffd700','#ff4060','#8b5cf6','#00ff88']});
+    setTimeout(()=>confetti({particleCount:90,angle:60,spread:60,origin:{x:0}}),350);
+    setTimeout(()=>confetti({particleCount:90,angle:120,spread:60,origin:{x:1}}),650);
+    db.incrementCounter('player_win');
+  } else {
+    losses++; streak=0;
+    localStorage.setItem('aki_losses',losses); localStorage.setItem('aki_streak','0');
+    document.getElementById('mo-emoji').textContent='🧙';
+    document.getElementById('mo-title').innerHTML=`Aki Wins! <span class="g-blue">Gotcha!</span>`;
+    document.getElementById('mo-desc').textContent=`I guessed "${lastGuess}" in ${questions} questions! ${elapsed<60?'⚡ Blazing fast!':''}`;
+    db.incrementCounter('aki_win');
+  }
+  updateStatsUI();
+  document.getElementById('save-wrap').style.display='block';
+  loadLB();
+}
+
+async function saveScore(){
+  const name=document.getElementById('player-name').value.trim()||'Anonymous';
+  const score=lastAkiWon?0:(15-(game?.questionCount||10))*100+Math.max(0,120-lastElapsed);
+  await db.addScore({name,game:'aki-cricket',questions:game?.questionCount,time:lastElapsed,akiWon:lastAkiWon,score});
+  document.getElementById('save-wrap').innerHTML='<div class="badge badge-green" style="justify-content:center;width:100%;padding:12px;font-size:0.82rem">✅ Saved to Firebase!</div>';
+  loadLB();
+}
+
+function closeModal(){
+  document.getElementById('modal-bg').classList.remove('open');
+  document.getElementById('btn-start').style.display='';
+  document.getElementById('cat-wrap').style.pointerEvents='';
+  document.getElementById('btn-yes').disabled=true;
+  document.getElementById('btn-no').disabled=true;
+  document.getElementById('confirm-wrap').style.display='none';
+  document.getElementById('save-wrap').style.display='none';
+}
+
+async function loadLB(){
+  const entries=await db.getLeaderboard('aki-cricket',8);
+  const el=document.getElementById('lb-list');
+  if(!entries.length){el.innerHTML='<div style="color:rgba(255,255,255,0.25);font-size:0.78rem;text-align:center;padding:12px 0">No scores yet 🚀</div>';return;}
+  el.innerHTML=entries.map((e,i)=>`
+    <div class="lb-row">
+      <div class="lb-rank${i<3?' gold':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+      <div class="lb-name">${e.name||'Anonymous'}</div>
+      <div class="lb-val">${e.aki_won?'🤖 AI':e.questions?`🎉 ${e.questions}Q`:'-'}</div>
+    </div>`).join('');
+}
+loadLB();
+</script>
+</body>
+</html>
