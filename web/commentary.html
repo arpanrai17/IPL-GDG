@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Commentary Styler — Legendary Commentator Styles | IPL AI Suite</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css"/>
+
+  <style>
+    /* Scoped Style Overrides for Commentary Page */
+    .comm-container {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      margin-top: 32px;
+    }
+
+    /* Form Fields styling */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      color: var(--white);
+      font-family: var(--font-main);
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .form-input:focus {
+      border-color: var(--blue);
+    }
+
+    /* Preset pills */
+    .preset-pill {
+      font-size: 0.7rem;
+      padding: 5px 12px;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: var(--font-main);
+      transition: all 0.2s ease;
+    }
+    .preset-pill:hover {
+      border-color: rgba(0, 212, 255, 0.35);
+      color: var(--blue);
+      background: rgba(0, 212, 255, 0.06);
+    }
+
+    /* Commentator cards grid */
+    .commentators-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 700px) {
+      .commentators-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Commentator Card */
+    .commentator-card {
+      padding: 20px 22px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .commentator-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    /* Audio Speaker Button */
+    .audio-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: all 0.25s;
+    }
+    .audio-btn:hover {
+      background: rgba(255,255,255,0.1);
+      transform: scale(1.05);
+    }
+    .audio-btn.speaking {
+      animation: pulse 1s infinite;
+    }
+
+    /* Nav Dropdown styling */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(13, 21, 38, 0.95);
+      backdrop-filter: blur(20px);
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      z-index: 500;
+      padding: 8px 0;
+      margin-top: 8px;
+    }
+    .dropdown-content a {
+      color: rgba(255,255,255,0.7);
+      padding: 10px 20px;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255,255,255,0.06);
+      color: #00d4ff;
+    }
+    .nav-dropdown:hover .dropdown-content {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="float-elements">
+    <div class="float-el">🎙️</div>
+    <div class="float-el">🔊</div>
+    <div class="float-el">📣</div>
+    <div class="float-el">✨</div>
+    <div class="float-el">⚾</div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- NAVIGATION -->
+    <nav class="nav">
+      <a href="index.html" class="nav-logo">🏏 IPL AI Suite</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="aki-cricket.html" class="nav-link">Aki-Cricket</a>
+        <a href="watch-party.html" class="nav-link">Watch Party</a>
+        
+        <div class="nav-dropdown">
+          <a href="#" class="nav-link active">AI Experiences ▾</a>
+          <div class="dropdown-content">
+            <a href="drs.html">🎬 AI DRS</a>
+            <a href="scriptwriter.html">📜 Scriptwriter</a>
+            <a href="predictor.html">📊 Predictor</a>
+            <a href="whatif.html">⚡ What-If</a>
+            <a href="clutch.html">🔥 Clutch Index</a>
+            <a href="fixer.html">🕵️ Match Fixer</a>
+            <a href="quiz.html">🎯 Live Quiz</a>
+            <a href="commentary.html" style="color: #00d4ff;">🎙️ Commentary</a>
+            <a href="tech-stack.html">🏆 Google Tech</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- CONTENT BODY -->
+    <main class="section">
+      <!-- Header -->
+      <div class="anim-up" style="margin-bottom: 40px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <div style="font-size: 1.5rem;">🎙️</div>
+          <span class="badge badge-blue">Legendary voice compilation</span>
+        </div>
+        <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">
+          Commentary <span class="grad-blue" style="background: linear-gradient(135deg, #00bfff, #a855f7); -webkit-background-clip: text; background-clip: text;">Styler</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 580px;">
+          Describe any cricket ball event. Gemini rewrites the event instantly into four distinct legend commentary profiles. Tap 🔊 to hear the voice compiler read each style aloud.
+        </p>
+      </div>
+
+      <!-- Container -->
+      <div class="comm-container">
+        
+        <!-- Input section -->
+        <div class="anim-left glass-card" style="padding: 24px; border-color: rgba(0, 212, 255, 0.12);">
+          <div class="form-group">
+            <label class="form-label">Describe the Cricket ball event</label>
+            <textarea id="ballEvent" class="form-input" rows="3" placeholder="e.g. Virat Kohli pulls Bumrah for a massive six over square leg..."></textarea>
+          </div>
+
+          <!-- Presets -->
+          <div style="margin-top: 12px;">
+            <div class="form-label" style="margin-bottom: 6px;">Quick Presets</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="preset-pill" data-text="Virat Kohli hits a reverse sweep six off the last ball to win the match">⚡ Kohli reverse sweep six</button>
+              <button class="preset-pill" data-text="Jasprit Bumrah bowls a perfect sand-shoe crusher yorker to clean up the tail-ender">⚡ Bumrah yorker shatters tail</button>
+              <button class="preset-pill" data-text="MS Dhoni finishes with a massive helicopter six over long-on, CSK wins by 2 wickets">⚡ Dhoni helicopter final-ball finish</button>
+              <button class="preset-pill" data-text="A highly controversial waist-high No-Ball overturns a crucial wickets catch in the final over">⚡ Controversial no-ball catch drama</button>
+            </div>
+          </div>
+
+          <!-- Action -->
+          <div style="margin-top: 20px;">
+            <button id="btn-generate" class="btn btn-primary" style="width: 100%; justify-content: center; gap: 8px;">
+              🎙️ Compile 4 Legendary Styles
+            </button>
+          </div>
+        </div>
+
+        <!-- Output section commentators grid -->
+        <div id="results-panel" class="anim-up" style="display: none; flex-direction: column; gap: 20px;">
+          <h4 style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">
+            Legend commentary feeds
+          </h4>
+          
+          <div id="commentators-container" class="commentators-grid"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/key.js"></script>
+  <script src="js/gemini.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btnGenerate = document.getElementById("btn-generate");
+      const ballEventInput = document.getElementById("ballEvent");
+      const resultsPanel = document.getElementById("results-panel");
+      const commentatorsContainer = document.getElementById("commentators-container");
+
+      const COMMENTATORS = {
+        "Harsha Bhogle":       { emoji: "🎙️", color: "#00bfff", style: "Poetic & Analytical", rate: 0.96, pitch: 1.0 },
+        "Ravi Shastri":        { emoji: "📣", color: "#ff8c00", style: "Dramatic & Booming",  rate: 0.85, pitch: 0.7 },
+        "Tony Greig":          { emoji: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", color: "#a855f7", style: "Excitable & Technical", rate: 1.0,  pitch: 0.9 },
+        "Conspiracy Theorist": { emoji: "🕵️", color: "#ff3366", style: "Suspicious & Paranoid",  rate: 1.12, pitch: 1.2 },
+      };
+
+      let activeSpeakingBadge = null;
+
+      // Presets hook
+      document.querySelectorAll(".preset-pill").forEach(btn => {
+        btn.addEventListener("click", () => {
+          ballEventInput.value = btn.getAttribute("data-text");
+        });
+      });
+
+      btnGenerate.addEventListener("click", async () => {
+        const text = ballEventInput.value;
+        if (!text.trim()) {
+          alert("Please describe a ball event first.");
+          return;
+        }
+
+        btnGenerate.disabled = true;
+        btnGenerate.innerHTML = `<span class="spinner" style="width: 14px; height: 14px; border-width: 2px;"></span> Simulating live microphones...`;
+        window.speechSynthesis.cancel();
+        activeSpeakingBadge = null;
+
+        try {
+          const result = await window.gemini.generateCommentaryStyles(text);
+          displayCommentary(result);
+        } catch (e) {
+          alert("Failed generating commentary styles: " + e.message);
+        } finally {
+          btnGenerate.disabled = false;
+          btnGenerate.innerHTML = `🎙️ Compile 4 Legendary Styles`;
+        }
+      });
+
+      function displayCommentary(data) {
+        resultsPanel.style.display = "flex";
+        commentatorsContainer.innerHTML = "";
+
+        data.styles.forEach((styleData, idx) => {
+          const cfg = COMMENTATORS[styleData.commentator] || { emoji: "🎤", color: "#00d4ff", style: styleData.style || "Standard", rate: 1.0, pitch: 1.0 };
+          
+          const card = document.createElement("div");
+          card.className = "commentator-card";
+          card.innerHTML = `
+            <!-- Top glowing indicator border -->
+            <div class="glowing-border-top" style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,${cfg.color},transparent);"></div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+              <div>
+                <strong style="font-size:1.05rem; font-weight:700; color:var(--white);">${cfg.emoji} ${styleData.commentator}</strong>
+                <div style="font-size:0.68rem; color:${cfg.color}; font-weight:600; letter-spacing:0.5px; margin-top:2px;">
+                  ${cfg.style}
+                </div>
+              </div>
+              <button class="audio-btn" style="border-color:${cfg.color}55;" title="Hear Style Read Aloud">🔊</button>
+            </div>
+
+            <p style="font-size:0.88rem; color:var(--text-secondary); line-height:1.7; font-style:italic; margin:0;">
+              "${styleData.commentary}"
+            </p>
+          `;
+
+          const audioBtn = card.querySelector(".audio-btn");
+          audioBtn.addEventListener("click", () => {
+            speakCommentary(styleData.commentary, styleData.commentator, audioBtn, cfg);
+          });
+
+          commentatorsContainer.appendChild(card);
+        });
+
+        // GSAP entry anims
+        gsap.from(".commentator-card", {
+          y: 24,
+          opacity: 0,
+          stagger: 0.08,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+      }
+
+      function speakCommentary(text, name, btn, cfg) {
+        window.speechSynthesis.cancel();
+        
+        // If clicking the currently active speaking button, just stop it and toggle off
+        if (activeSpeakingBadge === btn) {
+          activeSpeakingBadge.classList.remove("speaking");
+          activeSpeakingBadge.innerText = "🔊";
+          activeSpeakingBadge.style.color = "var(--text-muted)";
+          activeSpeakingBadge.style.background = "rgba(255,255,255,0.06)";
+          activeSpeakingBadge = null;
+          return;
+        }
+
+        // Toggle off previous active button
+        if (activeSpeakingBadge) {
+          activeSpeakingBadge.classList.remove("speaking");
+          activeSpeakingBadge.innerText = "🔊";
+          activeSpeakingBadge.style.color = "var(--text-muted)";
+          activeSpeakingBadge.style.background = "rgba(255,255,255,0.06)";
+        }
+
+        activeSpeakingBadge = btn;
+        btn.classList.add("speaking");
+        btn.innerText = "⏸";
+        btn.style.color = cfg.color;
+        btn.style.background = `${cfg.color}15`;
+
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = cfg.rate;
+        u.pitch = cfg.pitch;
+
+        u.onend = () => {
+          if (activeSpeakingBadge === btn) {
+            btn.classList.remove("speaking");
+            btn.innerText = "🔊";
+            btn.style.color = "var(--text-muted)";
+            btn.style.background = "rgba(255,255,255,0.06)";
+            activeSpeakingBadge = null;
+          }
+        };
+
+        window.speechSynthesis.speak(u);
+      }
+
+      // VanillaTilt
+      VanillaTilt.init(document.querySelectorAll(".glass-card"), { max: 4, speed: 600 });
+    });
+  </script>
+</body>
+</html>

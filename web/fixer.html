@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Match Fixer Score — Conspiracy Analyzer | IPL AI Suite</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css"/>
+
+  <style>
+    /* Scoped Style Overrides for Fixer Page */
+    .fixer-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    @media (min-width: 900px) {
+      .fixer-container { grid-template-columns: 1fr 1.1fr; }
+    }
+
+    /* Form Fields styling */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      color: var(--white);
+      font-family: var(--font-main);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--coral);
+    }
+    select.form-input option {
+      background: var(--navy-mid);
+      color: var(--white);
+    }
+
+    /* Progress bar override */
+    .fixer-bar {
+      height: 12px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    .fixer-fill {
+      height: 100%;
+      border-radius: 6px;
+      width: 0%;
+      transition: width 1.5s cubic-bezier(0.1, 1, 0.1, 1);
+    }
+
+    /* Nav Dropdown styling */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(13, 21, 38, 0.95);
+      backdrop-filter: blur(20px);
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      z-index: 500;
+      padding: 8px 0;
+      margin-top: 8px;
+    }
+    .dropdown-content a {
+      color: rgba(255,255,255,0.7);
+      padding: 10px 20px;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255,255,255,0.06);
+      color: #00d4ff;
+    }
+    .nav-dropdown:hover .dropdown-content {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="float-elements">
+    <div class="float-el">🕵️</div>
+    <div class="float-el">🚨</div>
+    <div class="float-el">💵</div>
+    <div class="float-el">🤐</div>
+    <div class="float-el">📊</div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- NAVIGATION -->
+    <nav class="nav">
+      <a href="index.html" class="nav-logo">🏏 IPL AI Suite</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="aki-cricket.html" class="nav-link">Aki-Cricket</a>
+        <a href="watch-party.html" class="nav-link">Watch Party</a>
+        
+        <div class="nav-dropdown">
+          <a href="#" class="nav-link active">AI Experiences ▾</a>
+          <div class="dropdown-content">
+            <a href="drs.html">🎬 AI DRS</a>
+            <a href="scriptwriter.html">📜 Scriptwriter</a>
+            <a href="predictor.html">📊 Predictor</a>
+            <a href="whatif.html">⚡ What-If</a>
+            <a href="clutch.html">🔥 Clutch Index</a>
+            <a href="fixer.html" style="color: #00d4ff;">🕵️ Match Fixer</a>
+            <a href="quiz.html">🎯 Live Quiz</a>
+            <a href="commentary.html">🎙️ Commentary</a>
+            <a href="tech-stack.html">🏆 Google Tech</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="section">
+      <!-- Header -->
+      <div class="anim-up" style="margin-bottom: 40px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <div style="font-size: 1.5rem;">🕵️</div>
+          <span class="badge badge-coral" style="border-color: rgba(255, 64, 96, 0.3); background: rgba(255, 64, 96, 0.15); color: var(--coral);">ENTERTAINMENT CONSPIRACY DETECTOR</span>
+        </div>
+        <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">
+          Match Fixer <span class="grad-blue" style="background: linear-gradient(135deg, #ff3366, #ff8c00); -webkit-background-clip: text; background-clip: text;">Score</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 580px;">
+          AI analyzes live match patterns for suspicious anomalies—run-rate climbs, betting shifts, and convenient tactical drops. <strong style="color: var(--coral);">purely for satirical entertainment.</strong>
+        </p>
+      </div>
+
+      <!-- Container -->
+      <div class="fixer-container">
+        
+        <!-- Left: Form -->
+        <div class="anim-left glass-card" style="padding: 24px;">
+          <h3 style="font-size: 0.95rem; font-weight: 800; color: var(--coral); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px;">
+            Match Conspiracy Inputs
+          </h3>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Team 1</label>
+                <select id="team1" class="form-input">
+                  <option value="Mumbai Indians" selected>Mumbai Indians</option>
+                  <option value="Chennai Super Kings">Chennai Super Kings</option>
+                  <option value="Royal Challengers Bengaluru">Royal Challengers Bengaluru</option>
+                  <option value="Kolkata Knight Riders">Kolkata Knight Riders</option>
+                  <option value="Delhi Capitals">Delhi Capitals</option>
+                  <option value="Rajasthan Royals">Rajasthan Royals</option>
+                  <option value="Sunrisers Hyderabad">Sunrisers Hyderabad</option>
+                  <option value="Punjab Kings">Punjab Kings</option>
+                  <option value="Lucknow Super Giants">Lucknow Super Giants</option>
+                  <option value="Gujarat Titans">Gujarat Titans</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Team 2</label>
+                <select id="team2" class="form-input">
+                  <option value="Mumbai Indians">Mumbai Indians</option>
+                  <option value="Chennai Super Kings" selected>Chennai Super Kings</option>
+                  <option value="Royal Challengers Bengaluru">Royal Challengers Bengaluru</option>
+                  <option value="Kolkata Knight Riders">Kolkata Knight Riders</option>
+                  <option value="Delhi Capitals">Delhi Capitals</option>
+                  <option value="Rajasthan Royals">Rajasthan Royals</option>
+                  <option value="Sunrisers Hyderabad">Sunrisers Hyderabad</option>
+                  <option value="Punjab Kings">Punjab Kings</option>
+                  <option value="Lucknow Super Giants">Lucknow Super Giants</option>
+                  <option value="Gujarat Titans">Gujarat Titans</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Score data -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+              <div class="form-group">
+                <label class="form-label">Score</label>
+                <input id="score" type="text" class="form-input" value="145/4"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Overs</label>
+                <input id="overs" type="text" class="form-input" value="18"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Target</label>
+                <input id="target" type="number" class="form-input" value="180"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Run Rate</label>
+                <input id="runrate" type="text" class="form-input" value="8.06"/>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Venue</label>
+              <input id="venue" type="text" class="form-input" value="Wankhede Stadium"/>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Extra Context (Optional)</label>
+              <textarea id="context" class="form-input" rows="2" style="resize: none; line-height: 1.5;" placeholder="e.g. Fielder dropped an incredibly easy catch in over 16..."></textarea>
+            </div>
+
+            <!-- Action -->
+            <div style="margin-top: 10px;">
+              <button id="btn-analyze" class="btn" style="width: 100%; justify-content: center; background: linear-gradient(135deg, var(--coral), #cc2244); color: var(--white); box-shadow: 0 0 20px rgba(255,64,96,0.3); font-size: 0.95rem;">
+                🕵️ Expose Suspicion Rating
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right Panel: Result -->
+        <div id="results-panel" class="anim-up" style="display: none; flex-direction: column; gap: 20px;">
+          
+          <!-- Suspicion gauge box -->
+          <div id="suspicion-box" class="glass-card" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
+              <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">AI SUSPICION PROBABILITY</span>
+              <strong id="txt-probability" style="font-family:'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 900; color: var(--coral);">72%</strong>
+            </div>
+            
+            <div class="fixer-bar">
+              <div id="bar-probability" class="fixer-fill"></div>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 14px; padding: 6px 14px; border-radius: 50px; display: inline-flex;" id="suspicion-badge-container">
+              <span style="font-size: 0.8rem; font-weight: 700;" id="txt-badge">HIGH SUSPICION</span>
+            </div>
+            
+            <p id="txt-verdict" style="margin-top: 12px; font-size: 0.9rem; color: var(--text-secondary); font-style: italic; line-height: 1.6;"></p>
+          </div>
+
+          <!-- Red flags list -->
+          <div class="glass-card">
+            <h4 style="font-size: 0.7rem; color: var(--coral); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">🚩 RED FLAGS DETECTED</h4>
+            <div id="redflags-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          </div>
+
+          <!-- Betting anomaly -->
+          <div id="betting-anomaly-box" class="glass-card" style="border-color: rgba(255,215,0,0.2); background: rgba(255,215,0,0.03);">
+            <div style="font-size: 0.7rem; color: var(--gold); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;">💸 BETTING MARKET ANOMALY</div>
+            <p id="txt-anomaly" style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.6;"></p>
+          </div>
+
+          <!-- Secret informant quote -->
+          <div id="insider-box" class="glass-card" style="border-color: rgba(139,92,246,0.25); background: rgba(139,92,246,0.03); display: flex; gap: 10px; align-items: flex-start;">
+            <span style="font-size: 1.4rem;">🕵️</span>
+            <div>
+              <div style="font-size: 0.7rem; color: var(--purple); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">ANONYMOUS WHISTLEBLOWER SPILL</div>
+              <p id="txt-insider" style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; font-style: italic; line-height: 1.6;"></p>
+            </div>
+          </div>
+
+          <!-- Final run breakdown -->
+          <div id="assessment-box" class="glass-card" style="border-left: 4px solid var(--coral); background: rgba(255,64,96,0.03);">
+            <div style="font-size: 0.7rem; color: var(--coral); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;">⚖️ FINAL AI ASSESSMENT</div>
+            <p id="txt-assessment" style="font-size: 0.88rem; color: var(--text-secondary); margin: 0; line-height: 1.7;"></p>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/key.js"></script>
+  <script src="js/gemini.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btnAnalyze = document.getElementById("btn-analyze");
+      const resultsPanel = document.getElementById("results-panel");
+      
+      const txtProbability = document.getElementById("txt-probability");
+      const barProbability = document.getElementById("bar-probability");
+      const suspicionBadgeContainer = document.getElementById("suspicion-badge-container");
+      const txtBadge = document.getElementById("txt-badge");
+      const txtVerdict = document.getElementById("txt-verdict");
+
+      const redflagsList = document.getElementById("redflags-list");
+      const txtAnomaly = document.getElementById("txt-anomaly");
+      const txtInsider = document.getElementById("txt-insider");
+      const txtAssessment = document.getElementById("txt-assessment");
+
+      const SUSPICION_CONFIG = {
+        LOW:     { color: "#00ff88", bg: "rgba(0,255,136,0.1)",  label: "LOOKS CLEAN" },
+        MEDIUM:  { color: "#ffd700", bg: "rgba(255,215,0,0.1)",  label: "SLIGHTLY SUS" },
+        HIGH:    { color: "#ff8c00", bg: "rgba(255,140,0,0.1)",  label: "HIGHLY SUSPICIOUS" },
+        EXTREME: { color: "#ff3366", bg: "rgba(255,51,102,0.1)", label: "ALMOST CERTAINLY FIXED!" },
+      };
+
+      btnAnalyze.addEventListener("click", async () => {
+        const team1 = document.getElementById("team1").value;
+        const team2 = document.getElementById("team2").value;
+        const score = document.getElementById("score").value;
+        const overs = document.getElementById("overs").value;
+        const target = document.getElementById("target").value;
+        const runRate = document.getElementById("runrate").value;
+        const venue = document.getElementById("venue").value;
+        const context = document.getElementById("context").value;
+
+        btnAnalyze.disabled = true;
+        btnAnalyze.innerHTML = `<span class="spinner" style="width: 14px; height: 14px; border-width: 2px;"></span> Compiling conspiracy indices...`;
+
+        try {
+          const matchData = { team1, team2, score, overs, target, runRate, venue, context };
+          const result = await window.gemini.generateFixerScore(matchData);
+          displayConspiracy(result);
+        } catch (e) {
+          alert("Exposing fix index failed: " + e.message);
+        } finally {
+          btnAnalyze.disabled = false;
+          btnAnalyze.innerHTML = `🕵️ Expose Suspicion Rating`;
+        }
+      });
+
+      function displayConspiracy(data) {
+        resultsPanel.style.display = "flex";
+
+        const prob = data.fixingProbability || 45;
+        txtProbability.innerText = prob + "%";
+        barProbability.style.width = prob + "%";
+
+        const cfg = SUSPICION_CONFIG[data.suspicionLevel] || SUSPICION_CONFIG.MEDIUM;
+        suspicionBadgeContainer.style.background = cfg.bg;
+        suspicionBadgeContainer.style.border = `1px solid ${cfg.color}35`;
+        txtBadge.innerText = `🚨 ${cfg.label}`;
+        txtBadge.style.color = cfg.color;
+        
+        txtProbability.style.color = cfg.color;
+        barProbability.style.background = `linear-gradient(90deg, #00ff88, #ffd700, #ff8c00, ${cfg.color})`;
+        barProbability.style.boxShadow = `0 0 10px ${cfg.color}44`;
+
+        txtVerdict.innerText = `"${data.verdict}"`;
+
+        // Render redflags list
+        redflagsList.innerHTML = "";
+        data.redFlags.forEach((flag, idx) => {
+          const row = document.createElement("div");
+          row.style = "display:flex; gap:10px; align-items:flex-start; font-size:0.86rem; color:var(--text-secondary);";
+          row.innerHTML = `<span style="color:var(--coral); font-weight:700;">${idx + 1}.</span> <span>${flag}</span>`;
+          redflagsList.appendChild(row);
+        });
+
+        // Details cards
+        txtAnomaly.innerText = data.bettingOddsAnomaly;
+        txtInsider.innerText = `"${data.insiderQuote}"`;
+        txtAssessment.innerText = data.overallAssessment;
+
+        // GSAP entry anims
+        gsap.from("#results-panel > div, #assessment-box", {
+          y: 24,
+          opacity: 0,
+          stagger: 0.05,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+      }
+
+      // VanillaTilt
+      VanillaTilt.init(document.querySelectorAll(".glass-card"), { max: 4, speed: 600 });
+    });
+  </script>
+</body>
+</html>

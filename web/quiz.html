@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cricket IQ Challenge — Live Quiz Engine | IPL AI Suite</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css"/>
+
+  <style>
+    /* Scoped Style Overrides for Quiz Page */
+    .matches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .match-select-card {
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .match-select-card:hover {
+      transform: translateY(-3px) scale(1.02);
+      border-color: rgba(0, 191, 255, 0.35);
+      box-shadow: 0 0 20px rgba(0, 191, 255, 0.15);
+    }
+    .match-select-card.live {
+      border-color: rgba(255, 64, 96, 0.25);
+    }
+    .match-select-card.live::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--coral), transparent);
+    }
+
+    /* Timer circle overlay */
+    .timer-circle-wrap {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+    }
+    .timer-circle-svg {
+      transform: rotate(-90deg);
+    }
+    .timer-circle-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.08);
+      stroke-width: 4;
+    }
+    .timer-circle-fill {
+      fill: none;
+      stroke-width: 4;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
+    }
+
+    /* Option buttons grid */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    @media (min-width: 600px) {
+      .options-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* MCQ Option button */
+    .option-btn {
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--white);
+      cursor: pointer;
+      text-align: left;
+      font-size: 0.88rem;
+      font-weight: 500;
+      line-height: 1.4;
+      font-family: var(--font-main);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .option-btn:hover:not(:disabled) {
+      transform: scale(1.01);
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.25);
+    }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .option-btn.correct {
+      background: rgba(0, 255, 136, 0.12) !important;
+      border-color: rgba(0, 255, 136, 0.4) !important;
+      color: var(--green) !important;
+    }
+    .option-btn.correct .option-letter {
+      background: rgba(0, 255, 136, 0.15);
+      border-color: rgba(0, 255, 136, 0.3);
+    }
+    .option-btn.incorrect {
+      background: rgba(255, 64, 96, 0.12) !important;
+      border-color: rgba(255, 64, 96, 0.4) !important;
+      color: var(--coral) !important;
+    }
+    .option-btn.incorrect .option-letter {
+      background: rgba(255, 64, 96, 0.15);
+      border-color: rgba(255, 64, 96, 0.3);
+    }
+
+    /* Explanation panel */
+    .explanation-panel {
+      display: none; /* toggled via JS */
+      padding: 14px 18px;
+      background: rgba(139, 92, 246, 0.06);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 12px;
+      margin-top: 16px;
+      animation: slideUp 0.3s ease forwards;
+    }
+
+    /* Nav Dropdown styling */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(13, 21, 38, 0.95);
+      backdrop-filter: blur(20px);
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      z-index: 500;
+      padding: 8px 0;
+      margin-top: 8px;
+    }
+    .dropdown-content a {
+      color: rgba(255,255,255,0.7);
+      padding: 10px 20px;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255,255,255,0.06);
+      color: #00d4ff;
+    }
+    .nav-dropdown:hover .dropdown-content {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="float-elements">
+    <div class="float-el">🎯</div>
+    <div class="float-el">🏆</div>
+    <div class="float-el">⏱️</div>
+    <div class="float-el">💡</div>
+    <div class="float-el">🧠</div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- NAVIGATION -->
+    <nav class="nav">
+      <a href="index.html" class="nav-logo">🏏 IPL AI Suite</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="aki-cricket.html" class="nav-link">Aki-Cricket</a>
+        <a href="watch-party.html" class="nav-link">Watch Party</a>
+        
+        <div class="nav-dropdown">
+          <a href="#" class="nav-link active">AI Experiences ▾</a>
+          <div class="dropdown-content">
+            <a href="drs.html">🎬 AI DRS</a>
+            <a href="scriptwriter.html">📜 Scriptwriter</a>
+            <a href="predictor.html">📊 Predictor</a>
+            <a href="whatif.html">⚡ What-If</a>
+            <a href="clutch.html">🔥 Clutch Index</a>
+            <a href="fixer.html">🕵️ Match Fixer</a>
+            <a href="quiz.html" style="color: #00d4ff;">🎯 Live Quiz</a>
+            <a href="commentary.html">🎙️ Commentary</a>
+            <a href="tech-stack.html">🏆 Google Tech</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- CONTENT SECTION -->
+    <main class="section">
+      <!-- Header -->
+      <div class="anim-up" style="margin-bottom: 40px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <div style="font-size: 1.5rem;">🎯</div>
+          <span class="badge badge-blue">Adaptive MCQ engine</span>
+        </div>
+        <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">
+          Cricket IQ <span class="grad-blue" style="background: linear-gradient(135deg, #00bfff, #a855f7); -webkit-background-clip: text; background-clip: text;">Challenge</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 580px;">
+          Select a live ticking match. Gemini compiles five customized statistical, strategic, and rule-based questions in real-time. Beat the clock and prove your cricket wisdom.
+        </p>
+      </div>
+
+      <!-- MATCH SELECTION PHASE -->
+      <div id="selection-panel" class="anim-up">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h4 style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">
+            Choose ticking scoreboard
+          </h4>
+          <button id="btn-refresh" class="btn btn-ghost" style="padding: 6px 14px; font-size: 0.78rem;">
+            🔄 Refresh matches
+          </button>
+        </div>
+
+        <div id="matches-container" class="matches-grid">
+          <div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">
+            <div class="spinner" style="margin: 0 auto 12px;"></div>
+            <span>Loading score data...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOADING GENERATION SCREEN -->
+      <div id="loading-panel" style="display: none; text-align: center; padding: 60px 20px;">
+        <div class="spinner" style="width: 44px; height: 44px; border-width: 4px; border-top-color: #00bfff; margin: 0 auto 20px; animation: spin 0.8s linear infinite;"></div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--white); margin-bottom: 6px;">Gemini compiling live quiz...</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Synthesizing questions based on runs, run rates, and tactical settings 🧠</p>
+      </div>
+
+      <!-- ACTIVE QUIZ PANEL -->
+      <div id="quiz-panel" class="anim-up" style="display: none; flex-direction: column; gap: 20px;">
+        
+        <!-- Live info context strip -->
+        <div style="padding: 10px 18px; background: rgba(0, 191, 255, 0.06); border: 1px solid rgba(0, 191, 255, 0.15); border-radius: 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 6px var(--coral); animation: pulse 1s infinite;"></div>
+          <strong id="lbl-match-title" style="font-size: 0.85rem;">CSK vs LSG Live</strong>
+          <span style="font-size: 0.72rem; color: var(--text-muted); margin-left: auto;">
+            Score: <strong id="lbl-running-score" style="color: var(--green);">0</strong> / <span id="lbl-running-total">0</span> answered
+          </span>
+        </div>
+
+        <!-- Progress bar & timer circle -->
+        <div class="glass-card" style="padding: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">
+              <span id="lbl-question-count">Q1 / 5</span>
+              <span id="lbl-category" style="color: var(--blue);">STATISTICS</span>
+            </div>
+            <div class="progress-bar" style="height: 5px;">
+              <div id="bar-progress" class="progress-fill" style="width: 20%;"></div>
+            </div>
+          </div>
+
+          <!-- Circular SVG Countdown Timer -->
+          <div class="timer-circle-wrap">
+            <svg class="timer-circle-svg" width="60" height="60">
+              <circle class="timer-circle-bg" cx="30" cy="30" r="22"/>
+              <circle id="timer-fill" class="timer-circle-fill" cx="30" cy="30" r="22" stroke="#00ff88"/>
+            </svg>
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+              <strong id="lbl-timer" style="font-family:'Space Grotesk',sans-serif; font-size: 1.1rem; color: var(--green);">20</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Question Card -->
+        <div class="glass-card">
+          <p id="lbl-question-text" style="font-size: 1.05rem; font-weight: 600; color: var(--white); line-height: 1.6; margin: 0;">
+            Question text loading...
+          </p>
+        </div>
+
+        <!-- MCQ option buttons -->
+        <div id="options-container" class="options-grid"></div>
+
+        <!-- Explanation panel drawer -->
+        <div id="explanation-box" class="explanation-panel">
+          <div style="font-size: 0.7rem; color: var(--purple); font-weight: 700; letter-spacing: 1px; margin-bottom: 4px;">💡 DETAILED AI EXPLANATION</div>
+          <p id="lbl-explanation-text" style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.6;"></p>
+        </div>
+
+      </div>
+
+      <!-- RESULTS SCREEN PANEL -->
+      <div id="results-panel" class="anim-up" style="display: none; text-align: center; padding: 40px 20px;">
+        <div id="lbl-emoji" style="font-size: 4rem; margin-bottom: 16px;">🏆</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;">
+          IQ CHALLENGE COMPLETE
+        </div>
+        <h2 id="lbl-score-text" style="font-family:'Space Grotesk',sans-serif; font-size: 3.5rem; font-weight: 900; color: var(--green); line-height: 1; margin-bottom: 10px;">
+          4 / 5
+        </h2>
+        <p id="lbl-verdict-text" style="font-size: 1.05rem; color: var(--white); margin-bottom: 6px;"></p>
+        <p id="lbl-results-match" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 30px;"></p>
+
+        <!-- Accuracy indicator box -->
+        <div class="glass-card" style="display: inline-block; padding: 16px 36px; margin-bottom: 32px;">
+          <div class="progress-bar" style="width: 140px; height: 8px; margin: 0 auto 8px;">
+            <div id="bar-accuracy" class="progress-fill" style="width: 80%;"></div>
+          </div>
+          <span id="lbl-accuracy-pct" style="font-size: 0.78rem; color: var(--text-muted);">80% Accuracy</span>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button id="btn-retry" class="btn btn-primary" style="padding: 12px 22px; font-size: 0.88rem;">
+            🔄 Same Match Quiz
+          </button>
+          <button id="btn-new-match" class="btn btn-ghost" style="padding: 12px 22px; font-size: 0.88rem;">
+            🏏 Select New Match
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/key.js"></script>
+  <script src="js/gemini.js"></script>
+  <script src="js/cricket.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const selectionPanel = document.getElementById("selection-panel");
+      const loadingPanel = document.getElementById("loading-panel");
+      const quizPanel = document.getElementById("quiz-panel");
+      const resultsPanel = document.getElementById("results-panel");
+      
+      const matchesContainer = document.getElementById("matches-container");
+      const btnRefresh = document.getElementById("btn-refresh");
+
+      const lblMatchTitle = document.getElementById("lbl-match-title");
+      const lblRunningScore = document.getElementById("lbl-running-score");
+      const lblRunningTotal = document.getElementById("lbl-running-total");
+      
+      const lblQuestionCount = document.getElementById("lbl-question-count");
+      const lblCategory = document.getElementById("lbl-category");
+      const barProgress = document.getElementById("bar-progress");
+      
+      const timerFill = document.getElementById("timer-fill");
+      const lblTimer = document.getElementById("lbl-timer");
+
+      const lblQuestionText = document.getElementById("lbl-question-text");
+      const optionsContainer = document.getElementById("options-container");
+      const explanationBox = document.getElementById("explanation-box");
+      const lblExplanationText = document.getElementById("lbl-explanation-text");
+
+      const lblEmoji = document.getElementById("lbl-emoji");
+      const lblScoreText = document.getElementById("lbl-score-text");
+      const lblVerdictText = document.getElementById("lbl-verdict-text");
+      const lblResultsMatch = document.getElementById("lbl-results-match");
+      const barAccuracy = document.getElementById("bar-accuracy");
+      const lblAccuracyPct = document.getElementById("lbl-accuracy-pct");
+      const btnRetry = document.getElementById("btn-retry");
+      const btnNewMatch = document.getElementById("btn-new-match");
+
+      const TIMER_TOTAL = 20;
+      const CIRCUMFERENCE = 2 * Math.PI * 22; // radius = 22
+
+      let liveMatchesList = [];
+      let selectedMatch = null;
+      let quizData = null;
+      let currentIdx = 0;
+      let scoreCount = 0;
+      let isAnswered = false;
+      let timeLeft = TIMER_TOTAL;
+      let timerInterval = null;
+
+      // Init circular SVG stroke dash
+      timerFill.style.strokeDasharray = CIRCUMFERENCE;
+
+      // Load scoreboard matches ticker
+      loadLiveMatches();
+
+      btnRefresh.addEventListener("click", () => loadLiveMatches());
+      btnNewMatch.addEventListener("click", () => {
+        selectionPanel.style.display = "block";
+        resultsPanel.style.display = "none";
+        quizPanel.style.display = "none";
+        loadLiveMatches();
+      });
+      btnRetry.addEventListener("click", () => {
+        resultsPanel.style.display = "none";
+        generateQuiz(selectedMatch);
+      });
+
+      async function loadLiveMatches() {
+        matchesContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">
+            <div class="spinner" style="margin: 0 auto 12px;"></div>
+            <span>Loading ticking scoreboard...</span>
+          </div>
+        `;
+        try {
+          liveMatchesList = await window.fetchLiveMatches();
+          matchesContainer.innerHTML = "";
+          liveMatchesList.forEach((m, idx) => {
+            const card = document.createElement("div");
+            const isLive = m.status === "LIVE";
+            card.className = "match-select-card" + (isLive ? " live" : "");
+            card.innerHTML = `
+              <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.7rem; font-weight:700;">
+                <span style="color:${isLive ? 'var(--coral)' : 'var(--text-muted)'};">${isLive ? '● LIVE TICKING' : m.status}</span>
+                <span style="color:var(--text-muted);">${m.matchType}</span>
+              </div>
+              <h4 style="font-size:0.88rem; font-weight:700; margin-bottom:8px; line-height:1.4;">${m.name}</h4>
+              <div style="font-size:0.78rem; color:var(--text-muted); display:flex; gap:10px;">
+                <span>🏏 ${m.runs}/${m.wickets}</span>
+                <span>⏱️ ${m.overs} ov</span>
+                <span>📈 RR ${m.runRate}</span>
+              </div>
+              <div style="margin-top:14px; padding:8px; background:linear-gradient(135deg, rgba(0,191,255,0.1), rgba(168,85,247,0.08)); border:1px solid rgba(0,191,255,0.2); border-radius:10px; text-align:center; font-size:0.78rem; font-weight:700; color:#00bfff;">
+                🎯 Generate IQ Quiz →
+              </div>
+            `;
+            card.addEventListener("click", () => generateQuiz(m));
+            matchesContainer.appendChild(card);
+          });
+        } catch (e) {
+          matchesContainer.innerHTML = `<div style="text-align:center; color:var(--coral); padding:20px; grid-column:1/-1;">Score ticker offline.</div>`;
+        }
+      }
+
+      async function generateQuiz(match) {
+        selectedMatch = match;
+        selectionPanel.style.display = "none";
+        loadingPanel.style.display = "block";
+        quizPanel.style.display = "none";
+        resultsPanel.style.display = "none";
+
+        const matchData = {
+          name: match.name,
+          runs: match.runs,
+          wickets: match.wickets,
+          overs: match.overs,
+          runRate: match.runRate,
+          target: match.target || "N/A",
+          venue: match.venue,
+          matchStatus: match.matchStatus || "Live match"
+        };
+
+        try {
+          // Delay for visual compilation dramatic effect
+          await new Promise(r => setTimeout(r, 1800));
+          quizData = await window.gemini.generateQuizFromMatch(matchData);
+          startQuiz();
+        } catch (e) {
+          alert("Failed compiling IQ Quiz: " + e.message);
+          selectionPanel.style.display = "block";
+          loadingPanel.style.display = "none";
+        } finally {
+          loadingPanel.style.display = "none";
+        }
+      }
+
+      function startQuiz() {
+        quizPanel.style.display = "flex";
+        currentIdx = 0;
+        scoreCount = 0;
+        lblMatchTitle.innerText = quizData.matchTitle;
+        loadQuestion(currentIdx);
+      }
+
+      function loadQuestion(idx) {
+        isAnswered = false;
+        explanationBox.style.display = "none";
+
+        const q = quizData.questions[idx];
+        lblQuestionCount.innerText = `Q${idx + 1} / ${quizData.questions.length}`;
+        lblCategory.innerText = q.category.toUpperCase();
+        
+        // Category colors
+        const catColors = { Statistics: "#00bfff", Strategy: "#a855f7", General: "#ffd700", Prediction: "#ff8c00", Tactics: "#00ff88" };
+        lblCategory.style.color = catColors[q.category] || "#00bfff";
+        
+        barProgress.style.width = ((idx + 1) / quizData.questions.length) * 100 + "%";
+        lblRunningScore.innerText = scoreCount;
+        lblRunningTotal.innerText = idx;
+
+        lblQuestionText.innerText = q.question;
+
+        // Render options buttons
+        optionsContainer.innerHTML = "";
+        q.options.forEach((opt, oIdx) => {
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          btn.innerHTML = `
+            <span class="option-letter">${["A","B","C","D"][oIdx]}</span>
+            <span>${opt}</span>
+          `;
+          btn.addEventListener("click", () => handleAnswer(oIdx));
+          optionsContainer.appendChild(btn);
+        });
+
+        // GSAP transition
+        gsap.from("#lbl-question-text, .option-btn", {
+          y: 20,
+          opacity: 0,
+          stagger: 0.05,
+          duration: 0.4,
+          ease: "power2.out"
+        });
+
+        // Reset and trigger Timer Countdown
+        timeLeft = TIMER_TOTAL;
+        updateTimerCircle();
+        
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            handleAnswer(-1); // wrong / timeout
+          }
+          updateTimerCircle();
+        }, 1000);
+      }
+
+      function updateTimerCircle() {
+        lblTimer.innerText = timeLeft;
+        const color = timeLeft <= 5 ? "var(--coral)" : timeLeft <= 10 ? "var(--gold)" : "var(--green)";
+        lblTimer.style.color = color;
+        timerFill.setAttribute("stroke", color);
+
+        // Circular stroke math
+        const progressPct = timeLeft / TIMER_TOTAL;
+        const offset = CIRCUMFERENCE - (progressPct * CIRCUMFERENCE);
+        timerFill.style.strokeDashoffset = offset;
+      }
+
+      function handleAnswer(optIdx) {
+        if (isAnswered) return;
+        isAnswered = true;
+        clearInterval(timerInterval);
+
+        const q = quizData.questions[currentIdx];
+        const correct = q.correct;
+        const isCorrect = optIdx === correct;
+
+        if (isCorrect) scoreCount++;
+        
+        // Highlight option buttons
+        const btns = optionsContainer.querySelectorAll(".option-btn");
+        btns.forEach((btn, idx) => {
+          btn.disabled = true;
+          if (idx === correct) {
+            btn.classList.add("correct");
+            btn.innerHTML += `<span style="margin-left:auto; font-size:1.1rem;">✓</span>`;
+          } else if (idx === optIdx && !isCorrect) {
+            btn.classList.add("incorrect");
+            btn.innerHTML += `<span style="margin-left:auto; font-size:1.1rem;">✗</span>`;
+          }
+        });
+
+        // Slide explanation
+        lblExplanationText.innerText = q.explanation;
+        explanationBox.style.display = "block";
+
+        // Advance to next after 2.2 seconds
+        setTimeout(() => {
+          if (currentIdx + 1 < quizData.questions.length) {
+            currentIdx++;
+            loadQuestion(currentIdx);
+          } else {
+            showQuizSummary();
+          }
+        }, 2200);
+      }
+
+      function showQuizSummary() {
+        quizPanel.style.display = "none";
+        resultsPanel.style.display = "block";
+
+        const totalQs = quizData.questions.length;
+        lblScoreText.innerText = `${scoreCount} / ${totalQs}`;
+        lblResultsMatch.innerText = `Based on Live: ${quizData.matchTitle}`;
+
+        const pct = Math.round((scoreCount / totalQs) * 100);
+        lblAccuracyPct.innerText = pct + "% Accuracy";
+        barAccuracy.style.width = pct + "%";
+
+        // Verdict configs
+        const emojis = { 100: "🏆", 80: "🌟", 60: "🎯", 40: "👏", 0: "📚" };
+        const textLabel = pct === 100 ? "Perfect Score! Cricket Legend! 🏏" 
+          : pct >= 80 ? "Outstanding! Cricket Mastermind! 🧠" 
+          : pct >= 60 ? "Solid Game! Cricket Analyst! 📊" 
+          : pct >= 40 ? "Good Effort! Keep Practicing! 🏏" 
+          : "Tough Innings! Time to hit the nets! 🏏";
+
+        lblEmoji.innerText = emojis[pct >= 80 ? (pct === 100 ? 100 : 80) : (pct >= 60 ? 60 : (pct >= 40 ? 40 : 0))];
+        lblVerdictText.innerText = textLabel;
+        
+        lblScoreText.style.color = pct >= 60 ? "var(--green)" : "var(--coral)";
+        barAccuracy.style.background = pct >= 60 ? "linear-gradient(90deg, var(--blue), var(--green))" : "linear-gradient(90deg, var(--gold), var(--coral))";
+
+        // GSAP entry anims
+        gsap.from("#results-panel > *", {
+          y: 24,
+          opacity: 0,
+          stagger: 0.1,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+      }
+
+      // VanillaTilt
+      VanillaTilt.init(document.querySelectorAll(".glass-card"), { max: 4, speed: 600 });
+    });
+  </script>
+</body>
+</html>

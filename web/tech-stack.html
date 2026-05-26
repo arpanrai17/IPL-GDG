@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Google Ecosystem Tech Stack — Broad Footprint | IPL AI Suite</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css"/>
+
+  <style>
+    /* Scoped Style Overrides for Tech Stack Page */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    
+    .tech-card {
+      padding: 22px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tech-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    /* Icon box */
+    .icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 1.4rem;
+    }
+
+    /* Nav Dropdown styling */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(13, 21, 38, 0.95);
+      backdrop-filter: blur(20px);
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      z-index: 500;
+      padding: 8px 0;
+      margin-top: 8px;
+    }
+    .dropdown-content a {
+      color: rgba(255,255,255,0.7);
+      padding: 10px 20px;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255,255,255,0.06);
+      color: #00d4ff;
+    }
+    .nav-dropdown:hover .dropdown-content {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="float-elements">
+    <div class="float-el">🏆</div>
+    <div class="float-el">✨</div>
+    <div class="float-el">🔥</div>
+    <div class="float-el">☁️</div>
+    <div class="float-el">🧠</div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- NAVIGATION -->
+    <nav class="nav">
+      <a href="index.html" class="nav-logo">🏏 IPL AI Suite</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="aki-cricket.html" class="nav-link">Aki-Cricket</a>
+        <a href="watch-party.html" class="nav-link">Watch Party</a>
+        
+        <div class="nav-dropdown">
+          <a href="#" class="nav-link active">AI Experiences ▾</a>
+          <div class="dropdown-content">
+            <a href="drs.html">🎬 AI DRS</a>
+            <a href="scriptwriter.html">📜 Scriptwriter</a>
+            <a href="predictor.html">📊 Predictor</a>
+            <a href="whatif.html">⚡ What-If</a>
+            <a href="clutch.html">🔥 Clutch Index</a>
+            <a href="fixer.html">🕵️ Match Fixer</a>
+            <a href="quiz.html">🎯 Live Quiz</a>
+            <a href="commentary.html">🎙️ Commentary</a>
+            <a href="tech-stack.html" style="color: #00d4ff;">🏆 Google Tech</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- CONTENT SECTION -->
+    <main class="section">
+      <!-- Header -->
+      <div class="anim-up" style="margin-bottom: 50px; text-align: center;">
+        <div style="display: inline-flex; align-items: center; gap: 10px; padding: 6px 20px; background: rgba(66,133,244,0.1); border: 1px solid rgba(66,133,244,0.25); border-radius: 999px; margin-bottom: 20px;">
+          <span style="font-size: 1.1rem;">🏆</span>
+          <span style="font-size: 0.8rem; font-weight: 700; color: #4285F4; letter-spacing: 1px; text-transform: uppercase;">Google Ecosystem Footprint</span>
+        </div>
+        <h1 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 16px;">
+          Powered by <span class="grad-blue" style="background: linear-gradient(135deg, #4285F4, #34a853, #fbbc05, #ea4335); -webkit-background-clip: text; background-clip: text;">Google Cloud & AI</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto;">
+          Showcasing the production-grade technologies, multi-modal LLM compilers, and future roadmap APIs backing our world-class IPL AI experiences.
+        </p>
+      </div>
+
+      <!-- SECTION 1: USED Google Technologies -->
+      <div class="anim-up" style="margin-bottom: 40px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+          <span style="font-size: 1.3rem;">✓</span>
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--green); letter-spacing: 2px; text-transform: uppercase;">INTEGRATED & ACTIVE IN CODE</span>
+        </div>
+
+        <div class="tech-grid" id="used-grid">
+          <!-- Card 1 -->
+          <div class="tech-card" style="border: 1px solid rgba(139, 92, 246, 0.25);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--purple);"></div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">🧠</div>
+              <span class="badge badge-green" style="font-size:0.65rem;">ACTIVE IN USE</span>
+            </div>
+            <h4 style="font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Gemini 1.5 Flash</h4>
+            <div style="font-size: 0.72rem; color: var(--purple); font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">AI MULTI-MODAL ENGINE</div>
+            <p style="color: var(--text-muted); font-size: 0.82rem; line-height: 1.6;">Exposed inside the compiler to manage Vision (DRS image frame decodes), live MC commentary streaming, and adaptive Quiz MCQ compilations.</p>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="tech-card" style="border: 1px solid rgba(66, 133, 244, 0.25);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: #4285F4;"></div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(66, 133, 244, 0.12); color: #4285F4;">⚙️</div>
+              <span class="badge badge-green" style="font-size:0.65rem;">ACTIVE IN USE</span>
+            </div>
+            <h4 style="font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Google AI Studio</h4>
+            <div style="font-size: 0.72rem; color: #4285F4; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">LLM PROMPT TUNING HUB</div>
+            <p style="color: var(--text-muted); font-size: 0.82rem; line-height: 1.6;">Leveraged during design to structure structured JSON umpire responses, safety-filter settings, and parameter temperature configs.</p>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="tech-card" style="border: 1px solid rgba(255, 109, 0, 0.25);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: #FF6D00;"></div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(255, 109, 0, 0.12); color: #FF6D00;">🔥</div>
+              <span class="badge badge-blue" style="font-size:0.65rem; background:rgba(0,191,255,0.08); border-color:rgba(0,191,255,0.2); color:#00bfff;">CONFIGURED</span>
+            </div>
+            <h4 style="font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Firebase Hosting</h4>
+            <div style="font-size: 0.72rem; color: #FF6D00; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">REAL-TIME SERVER HOST</div>
+            <p style="color: var(--text-muted); font-size: 0.82rem; line-height: 1.6;">Configured inside the ecosystem to deploy static assets cleanly, supporting micro-latency visual loads and secure SSL certificate headers.</p>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="tech-card" style="border: 1px solid rgba(0, 255, 136, 0.25);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: #00ff88;"></div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(0, 255, 136, 0.12); color: #00ff88;">🛸</div>
+              <span class="badge badge-green" style="font-size:0.65rem;">ACTIVE IN USE</span>
+            </div>
+            <h4 style="font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Antigravity AI</h4>
+            <div style="font-size: 0.72rem; color: #00ff88; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">DEEPMIND PAIR COMPILER</div>
+            <p style="color: var(--text-muted); font-size: 0.82rem; line-height: 1.6;">Google DeepMind's agentic engineering compiler, utilized to construct layout modules, SSE stream decoders, and secure key isolations.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: PROSPECTIVE Google Technologies (Roadmap) -->
+      <div class="anim-up">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+          <span style="font-size: 1.3rem;">🚀</span>
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--blue); letter-spacing: 2px; text-transform: uppercase;">INTEGRATION ROADMAP — ECOSYSTEM CAPABILITIES</span>
+        </div>
+
+        <div class="tech-grid" id="roadmap-grid">
+          
+          <!-- Vertex AI -->
+          <div class="tech-card" style="border: 1px solid rgba(66, 133, 244, 0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(66, 133, 244, 0.08); color: #4285F4;">🛰️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+            </div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Vertex AI</h4>
+            <div style="font-size: 0.68rem; color: #4285F4; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">CUSTOM ML PIPELINES</div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5;">Train highly customized statistical cricket algorithms on historical IPL run data to output ultra-precise live victory models.</p>
+          </div>
+
+          <!-- Cloud Vision API -->
+          <div class="tech-card" style="border: 1px solid rgba(0, 212, 255, 0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(0, 212, 255, 0.08); color: #00d4ff;">👁️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+            </div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Cloud Vision API</h4>
+            <div style="font-size: 0.68rem; color: #00d4ff; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">SCOREBOARD OCR recognition</div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5;">Extract real-time batting stats and bowler configurations directly from live TV broadcaster scoreboard stream frames.</p>
+          </div>
+
+          <!-- Cloud Text-to-Speech -->
+          <div class="tech-card" style="border: 1px solid rgba(0, 255, 136, 0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(0, 255, 136, 0.08); color: #00ff88;">🎙️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+            </div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Cloud Text-to-Speech</h4>
+            <div style="font-size: 0.68rem; color: #00ff88; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">SYNTHETIC commentary voices</div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5;">Leverage WaveNet algorithms to generate warm regional audio dial commentaries (Hindi, Tamil, Kannada) matching legend styles.</p>
+          </div>
+
+          <!-- Firestore -->
+          <div class="tech-card" style="border: 1px solid rgba(255, 109, 0, 0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(255, 109, 0, 0.08); color: #FF6D00;">🗄️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+            </div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Cloud Firestore</h4>
+            <div style="font-size: 0.68rem; color: #FF6D00; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">real-time ledger database</div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5;">Save DRS umpire review summaries, player Streaks, and compiled conspiracy scripts to construct global shared leaderboards.</p>
+          </div>
+
+          <!-- YouTube Data API -->
+          <div class="tech-card" style="border: 1px solid rgba(234, 67, 53, 0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(234, 67, 53, 0.08); color: #ea4335;">▶️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+            </div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">YouTube Data API</h4>
+            <div style="font-size: 0.68rem; color: #ea4335; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">HIGHLIGHT VIDEO METADATA</div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5;">Fetch official match visual recap clips, embedding historical moments directly inside the What-If parallel realities timelines.</p>
+          </div>
+
+          <!-- BigQuery -->
+          <div class="tech-card" style="border: 1px solid rgba(0, 212, 255, 0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(0, 212, 255, 0.08); color: #00d4ff;">🔍</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+            </div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">BigQuery</h4>
+            <div style="font-size: 0.68rem; color: #00d4ff; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">HIGH-VOLUME STAT ANALYTICS</div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5;">Index thousands of DRS review overrides. Run analytical SQL passes: Which franchise reviews most? Which umpire is most overturned?</p>
+          </div>
+
+          <!-- Google Maps Platform -->
+          <div class="tech-card" style="border: 1px solid rgba(52, 168, 83, 0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(52, 168, 83, 0.08); color: #34a853;">🗺️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+            </div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Google Maps Platform</h4>
+            <div style="font-size: 0.68rem; color: #34a853; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">STADIUM HEATMAP MAPPING</div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5;">Map controversial review outcomes geographically, constructing an interactive global map detailing hot spots of referee bias.</p>
+          </div>
+
+          <!-- Firebase Auth -->
+          <div class="tech-card" style="border: 1px solid rgba(251, 188, 4, 0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(251, 188, 4, 0.08); color: #fbbc04;">🛡️</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+            </div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Firebase Auth</h4>
+            <div style="font-size: 0.68rem; color: #fbbc04; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">SECURE GOOGLE USER PROFILES</div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5;">Provide lightning-fast Google One-Tap Sign-In, securing private user prediction records and saved conspiracy draft listings.</p>
+          </div>
+
+          <!-- Looker Studio -->
+          <div class="tech-card" style="border: 1px solid rgba(66, 133, 244, 0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="icon-box" style="background: rgba(66, 133, 244, 0.08); color: #4285F4;">📊</div>
+              <span class="badge badge-coral" style="font-size:0.65rem; background:rgba(255,64,96,0.08); border-color:rgba(255,64,96,0.2); color:var(--coral);">ROADMAP</span>
+            </div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 4px;">Looker Studio</h4>
+            <div style="font-size: 0.68rem; color: #4285F4; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase;">DATA SHEET report panels</div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5;">Create highly visual spreadsheet dashboard charts, summarizing match prediction records and DRS success stats for hackathon panels.</p>
+          </div>
+        </div>
+
+        <!-- Strategy Box -->
+        <div class="glass-card" style="display: flex; gap: 16px; align-items: flex-start; background: linear-gradient(135deg, rgba(66,133,244,0.06), rgba(52,168,83,0.04)); border-color: rgba(66,133,244,0.2); border-radius: 20px;">
+          <span style="font-size: 2rem;">🏆</span>
+          <div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; color: #4285F4; margin-bottom: 6px;">Google Ecosystem Strategy Outline</h4>
+            <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.65;">
+              To maximize Google cloud integration merit: introducing <strong style="color:var(--green);">Firebase Auth</strong> (user profiles) + <strong style="color:#FF6D00;">Cloud Firestore</strong> (saved history lists) + <strong style="color:var(--purple);">Cloud Text-to-Speech</strong> (Umpires vocabs audio waves) constitutes a complete, production-grade cloud solution pipeline.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // GSAP visuals
+      gsap.from(".tech-card, .glass-card", {
+        y: 30,
+        opacity: 0,
+        stagger: 0.06,
+        duration: 0.5,
+        ease: "power2.out"
+      });
+
+      // VanillaTilt
+      VanillaTilt.init(document.querySelectorAll(".tech-card, .glass-card"), { max: 4, speed: 600 });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Player Clutch Index — Pressure Performance | IPL AI Suite</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css"/>
+
+  <style>
+    /* Scoped Style Overrides for Clutch Page */
+    .matches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .match-select-card {
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .match-select-card:hover {
+      transform: translateY(-3px) scale(1.02);
+      border-color: rgba(255, 140, 0, 0.35);
+      box-shadow: 0 0 20px rgba(255, 140, 0, 0.15);
+    }
+    .match-select-card.live {
+      border-color: rgba(255, 64, 96, 0.25);
+    }
+    .match-select-card.live::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--coral), transparent);
+    }
+
+    /* Player Cards styling */
+    .players-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .player-clutch-card {
+      padding: 18px 20px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 18px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .player-clutch-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    /* Clutch meter gauge styling */
+    .clutch-gauge {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+    }
+    .clutch-gauge-bar {
+      width: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      transition: all 0.5s;
+    }
+
+    /* Expandable drawer */
+    .clutch-drawer {
+      display: none; /* toggled via JS */
+      flex-direction: column;
+      gap: 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+    .stat-box {
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    /* Grade designs */
+    .grade-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Nav Dropdown styling */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(13, 21, 38, 0.95);
+      backdrop-filter: blur(20px);
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      z-index: 500;
+      padding: 8px 0;
+      margin-top: 8px;
+    }
+    .dropdown-content a {
+      color: rgba(255,255,255,0.7);
+      padding: 10px 20px;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255,255,255,0.06);
+      color: #00d4ff;
+    }
+    .nav-dropdown:hover .dropdown-content {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="float-elements">
+    <div class="float-el">🔥</div>
+    <div class="float-el">🏆</div>
+    <div class="float-el">🥶</div>
+    <div class="float-el">📊</div>
+    <div class="float-el">⚡</div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- NAVIGATION -->
+    <nav class="nav">
+      <a href="index.html" class="nav-logo">🏏 IPL AI Suite</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="aki-cricket.html" class="nav-link">Aki-Cricket</a>
+        <a href="watch-party.html" class="nav-link">Watch Party</a>
+        
+        <div class="nav-dropdown">
+          <a href="#" class="nav-link active">AI Experiences ▾</a>
+          <div class="dropdown-content">
+            <a href="drs.html">🎬 AI DRS</a>
+            <a href="scriptwriter.html">📜 Scriptwriter</a>
+            <a href="predictor.html">📊 Predictor</a>
+            <a href="whatif.html">⚡ What-If</a>
+            <a href="clutch.html" style="color: #00d4ff;">🔥 Clutch Index</a>
+            <a href="fixer.html">🕵️ Match Fixer</a>
+            <a href="quiz.html">🎯 Live Quiz</a>
+            <a href="commentary.html">🎙️ Commentary</a>
+            <a href="tech-stack.html">🏆 Google Tech</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- CONTENT BODY -->
+    <main class="section">
+      <!-- Header -->
+      <div class="anim-up" style="margin-bottom: 40px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <div style="font-size: 1.5rem;">🔥</div>
+          <span class="badge badge-coral" style="background: rgba(255, 140, 0, 0.15); border-color: rgba(255, 140, 0, 0.3); color: #ff8c00;">Live Pressure Analytics</span>
+        </div>
+        <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">
+          Player Clutch <span class="grad-blue" style="background: linear-gradient(135deg, #ff8c00, #ff3366); -webkit-background-clip: text; background-clip: text;">Index</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 580px;">
+          Select a live match. Our analytical model measures player form, death overs economy, and historical composure under high pressure to rank their clutch factor in real-time.
+        </p>
+      </div>
+
+      <!-- Live Selection Panel -->
+      <div id="selection-panel" class="anim-up">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4 style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">
+            Live Matches ticking
+          </h4>
+          <button id="btn-refresh" class="btn btn-ghost" style="padding: 6px 14px; font-size: 0.78rem;">
+            🔄 Refresh Ticker
+          </button>
+        </div>
+        
+        <div id="matches-container" class="matches-grid">
+          <!-- Dynamically filled -->
+          <div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">
+            <div class="spinner" style="margin: 0 auto 12px;"></div>
+            <span>Fetching live scores...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analyzing Delay Screen -->
+      <div id="loading-panel" style="display: none; text-align: center; padding: 60px 20px;">
+        <div class="spinner" style="width: 44px; height: 44px; border-width: 4px; border-top-color: #ff8c00; margin: 0 auto 20px; animation: spin 0.8s linear infinite;"></div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--white); margin-bottom: 6px;">Gemini Compiling Clutch Indices...</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Calculating match pressure variables and player big-game history 🧠</p>
+      </div>
+
+      <!-- Results Display Panel -->
+      <div id="results-panel" class="anim-up" style="display: none; flex-direction: column; gap: 20px;">
+        
+        <!-- Header Info bar -->
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 12px 18px; background: rgba(255, 140, 0, 0.05); border: 1px solid rgba(255, 140, 0, 0.15); border-radius: 14px;">
+          <div>
+            <h4 id="lbl-match-title" style="font-size: 0.92rem; font-weight: 700;">CSK vs LSG Live</h4>
+            <p id="lbl-match-context" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;"></p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <span id="badge-pressure" class="badge">🔥 HIGH PRESSURE</span>
+            <button id="btn-back" class="btn btn-ghost" style="padding: 6px 14px; font-size: 0.78rem;">
+              ← Back
+            </button>
+          </div>
+        </div>
+
+        <!-- Team Clutch Ratings -->
+        <div id="team-ratings-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"></div>
+
+        <!-- Highlights (Elite & Watch out) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div style="padding: 12px 16px; background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.15); border-radius: 12px; display: flex; gap: 10px; align-items: center;">
+            <span style="font-size: 1.4rem;">🏆</span>
+            <div>
+              <div style="font-size: 0.65rem; color: var(--gold); font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;">MOST CLUTCH PLAYER</div>
+              <strong id="lbl-most-clutch" style="font-size: 0.85rem; color: var(--white);">Virat Kohli</strong>
+            </div>
+          </div>
+          <div style="padding: 12px 16px; background: rgba(255,64,96,0.05); border: 1px solid rgba(255,64,96,0.15); border-radius: 12px; display: flex; gap: 10px; align-items: center;">
+            <span style="font-size: 1.4rem;">⚠️</span>
+            <div>
+              <div style="font-size: 0.65rem; color: var(--coral); font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;">PRESSURE RISK WARN</div>
+              <strong id="lbl-biggest-choker" style="font-size: 0.85rem; color: var(--white);">Fringe Bowler</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Player Cards Grid -->
+        <div id="players-container" class="players-grid"></div>
+
+        <p style="font-size: 0.72rem; color: rgba(255,255,255,0.25); text-align: center;">
+          ℹ️ Clutch Index calculations are entertainment AI compilations, syncing live scores with historical statistics.
+        </p>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/key.js"></script>
+  <script src="js/gemini.js"></script>
+  <script src="js/cricket.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const selectionPanel = document.getElementById("selection-panel");
+      const loadingPanel = document.getElementById("loading-panel");
+      const resultsPanel = document.getElementById("results-panel");
+      const matchesContainer = document.getElementById("matches-container");
+      const btnRefresh = document.getElementById("btn-refresh");
+      const btnBack = document.getElementById("btn-back");
+
+      const lblMatchTitle = document.getElementById("lbl-match-title");
+      const lblMatchContext = document.getElementById("lbl-match-context");
+      const badgePressure = document.getElementById("badge-pressure");
+      const teamRatingsContainer = document.getElementById("team-ratings-container");
+      const lblMostClutch = document.getElementById("lbl-most-clutch");
+      const lblBiggestChoker = document.getElementById("lbl-biggest-choker");
+      const playersContainer = document.getElementById("players-container");
+
+      const GRADE_CONFIG = {
+        S: { color: "#ffd700", bg: "rgba(255,215,0,0.1)",  label: "ELITE" },
+        A: { color: "#00ff88", bg: "rgba(0,255,136,0.08)", label: "CLUTCH" },
+        B: { color: "#00d4ff", bg: "rgba(0,212,255,0.08)", label: "SOLID"  },
+        C: { color: "#ff8c00", bg: "rgba(255,140,0,0.08)", label: "AVERAGE"},
+        D: { color: "#ff4060", bg: "rgba(255,64,96,0.08)",  label: "CHOKER"},
+      };
+
+      const VERDICT_CONFIG = {
+        "RELY ON":  { color: "#00ff88", icon: "✅" },
+        "RISKY":    { color: "#ff4060", icon: "⚠️" },
+        "WILDCARD": { color: "#8b5cf6", icon: "🎲" },
+      };
+
+      // Load matches ticker
+      loadLiveMatches();
+
+      btnRefresh.addEventListener("click", () => loadLiveMatches());
+      btnBack.addEventListener("click", () => {
+        selectionPanel.style.display = "block";
+        resultsPanel.style.display = "none";
+        loadingPanel.style.display = "none";
+      });
+
+      async function loadLiveMatches() {
+        matchesContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;">
+            <div class="spinner" style="margin: 0 auto 12px;"></div>
+            <span>Refreshing live scoreboard...</span>
+          </div>
+        `;
+        try {
+          const list = await window.fetchLiveMatches();
+          matchesContainer.innerHTML = "";
+          list.forEach((m, idx) => {
+            const card = document.createElement("div");
+            const isLive = m.status === "LIVE";
+            card.className = "match-select-card" + (isLive ? " live" : "");
+            card.innerHTML = `
+              <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.7rem; font-weight:700;">
+                <span style="color:${isLive ? 'var(--coral)' : 'var(--text-muted)'};">${isLive ? '● LIVE TICKING' : m.status}</span>
+                <span style="color:var(--text-muted);">${m.matchType}</span>
+              </div>
+              <h4 style="font-size:0.88rem; font-weight:700; margin-bottom:8px; line-height:1.4;">${m.name}</h4>
+              <div style="font-size:0.78rem; color:var(--text-muted); display:flex; gap:10px;">
+                <span>🏏 ${m.runs}/${m.wickets}</span>
+                <span>⏱️ ${m.overs} ov</span>
+                <span>📈 RR ${m.runRate}</span>
+              </div>
+              <div style="margin-top:14px; padding:8px; background:rgba(255, 140, 0, 0.08); border:1px solid rgba(255, 140, 0, 0.2); border-radius:10px; text-align:center; font-size:0.78rem; font-weight:700; color:#ff8c00;">
+                🔥 Expose Player Clutch Indices →
+              </div>
+            `;
+            card.addEventListener("click", () => fetchClutch(m));
+            matchesContainer.appendChild(card);
+          });
+        } catch (e) {
+          matchesContainer.innerHTML = `<div style="text-align:center; color:var(--coral); padding:20px; grid-column:1/-1;">Fail to fetch ticker scores.</div>`;
+        }
+      }
+
+      async function fetchClutch(match) {
+        selectionPanel.style.display = "none";
+        loadingPanel.style.display = "block";
+        resultsPanel.style.display = "none";
+
+        const matchData = {
+          name: match.name,
+          team1: match.team1?.name || "Team 1",
+          team2: match.team2?.name || "Team 2",
+          score: `${match.runs}/${match.wickets}`,
+          overs: match.overs,
+          runRate: match.runRate,
+          requiredRunRate: match.requiredRunRate || "N/A",
+          target: match.target || "N/A",
+          venue: match.venue,
+          matchStatus: match.matchStatus || "Live match in progress"
+        };
+
+        try {
+          // Delay for visual compilation dramatic effect
+          await new Promise(r => setTimeout(r, 1800));
+          const result = await window.gemini.generateClutchIndex(matchData);
+          displayClutch(match, result);
+        } catch (e) {
+          alert("Exposing clutch indices fail: " + e.message);
+          selectionPanel.style.display = "block";
+          loadingPanel.style.display = "none";
+        } finally {
+          loadingPanel.style.display = "none";
+        }
+      }
+
+      function displayClutch(match, data) {
+        resultsPanel.style.display = "flex";
+
+        lblMatchTitle.innerText = match.name;
+        lblMatchContext.innerText = data.matchContext;
+        
+        // Pressure badge styling
+        badgePressure.innerText = `🔥 ${data.pressureLevel} PRESSURE`;
+        const colors = { LOW: "#00ff88", MEDIUM: "#ffd700", HIGH: "#ff8c00", CRITICAL: "#ff4060" };
+        const pressureColor = colors[data.pressureLevel] || "#ffd700";
+        badgePressure.style.borderColor = pressureColor;
+        badgePressure.style.color = pressureColor;
+        badgePressure.style.background = `${pressureColor}15`;
+
+        // Render team clutch ratings
+        teamRatingsContainer.innerHTML = "";
+        Object.entries(data.teamClutchRating).forEach(([teamName, rating]) => {
+          const ratingColor = rating >= 72 ? "var(--green)" : rating >= 58 ? "var(--gold)" : "var(--coral)";
+          const bar = document.createElement("div");
+          bar.className = "glass-card";
+          bar.innerHTML = `
+            <div style="font-size:0.7rem; color:var(--text-muted); font-weight:600; margin-bottom:6px;">${teamName} — Overall Clutch Rating</div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <strong style="font-size:1.6rem; color:${ratingColor}; font-weight:900; line-height:1;">${rating}</strong>
+              <div class="progress-bar" style="flex:1; height:6px;">
+                <div class="progress-fill" style="width:${rating}%; background:${ratingColor}; box-shadow:0 0 8px ${ratingColor}44;"></div>
+              </div>
+            </div>
+          `;
+          teamRatingsContainer.appendChild(bar);
+        });
+
+        // Highlights
+        lblMostClutch.innerText = data.mostClutchPlayer;
+        lblBiggestChoker.innerText = data.biggestChoker;
+
+        // Render player cards
+        playersContainer.innerHTML = "";
+        data.players.forEach((p, idx) => {
+          const card = document.createElement("div");
+          card.className = "player-clutch-card";
+          
+          const cfg = GRADE_CONFIG[p.clutchGrade] || GRADE_CONFIG.C;
+          const vcfg = VERDICT_CONFIG[p.verdict] || VERDICT_CONFIG["RISKY"];
+
+          // Custom vertical bar indicators clutch gauge
+          let gaugeHTML = `<div class="clutch-gauge">`;
+          for (let i = 0; i < 10; i++) {
+            const filled = (p.clutchScore / 100) * 10 > i;
+            const barHeight = i < 3 ? 10 : i < 6 ? 14 : i < 8 ? 18 : 22;
+            gaugeHTML += `
+              <div class="clutch-gauge-bar" style="
+                height:${barHeight}px; 
+                background:${filled ? cfg.color : 'rgba(255,255,255,0.08)'};
+                box-shadow:${filled ? `0 0 6px ${cfg.color}66` : 'none'};
+              "></div>
+            `;
+          }
+          gaugeHTML += `</div>`;
+
+          card.innerHTML = `
+            <!-- Top glowing line -->
+            <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,${cfg.color},transparent);"></div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+              <div>
+                <strong style="font-size:0.95rem; font-weight:700; color:var(--white);">${p.name}</strong>
+                <div style="display:flex; gap:6px; font-size:0.68rem; color:var(--text-muted); margin-top:2px;">
+                  <span>${p.team}</span> <span>•</span> <span>${p.role}</span>
+                </div>
+              </div>
+              
+              <!-- Grade badge -->
+              <div class="grade-badge" style="background:${cfg.bg}; border:1.5px solid ${cfg.color}35; box-shadow:0 0 10px ${cfg.color}30;">
+                <span style="font-size:0.88rem; font-weight:900; color:${cfg.color}; line-height:1;">${p.clutchGrade}</span>
+                <span style="font-size:0.45rem; color:${cfg.color}; font-weight:700; letter-spacing:0.5px;">${cfg.label}</span>
+              </div>
+            </div>
+
+            <!-- Score meter -->
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <div>
+                <div style="font-size:0.6rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:2px;">CLUTCH INDEX</div>
+                <strong style="font-size:1.6rem; font-weight:900; color:${cfg.color}; line-height:1;">${p.clutchScore}</strong>
+              </div>
+              <div style="flex:1;">
+                ${gaugeHTML}
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="display:inline-block; padding:3px 10px; border-radius:50px; background:${cfg.bg}; border:1px solid ${cfg.color}25; font-size:0.7rem; font-weight:700; color:${cfg.color};">
+                🏷️ ${p.label}
+              </span>
+              <span style="font-size:0.7rem; font-weight:700; color:${vcfg.color};">${vcfg.icon} ${p.verdict}</span>
+            </div>
+
+            <!-- Expandable details -->
+            <div class="clutch-drawer">
+              <div class="stats-row">
+                <div class="stat-box">
+                  <strong style="font-size:0.8rem; font-weight:700;">${p.pressureStats.deathOverEconomy}</strong>
+                  <div style="font-size:0.55rem; color:var(--text-muted); margin-top:2px;">DEATH ECON</div>
+                </div>
+                <div class="stat-box">
+                  <strong style="font-size:0.8rem; font-weight:700;">${p.pressureStats.chaseSuccessRate}</strong>
+                  <div style="font-size:0.55rem; color:var(--text-muted); margin-top:2px;">CHASE SUCCESS</div>
+                </div>
+                <div class="stat-box">
+                  <strong style="font-size:0.8rem; font-weight:700;">${p.pressureStats.bigMatchAverage}</strong>
+                  <div style="font-size:0.55rem; color:var(--text-muted); margin-top:2px;">BIG MATCH AVG</div>
+                </div>
+              </div>
+
+              <p style="font-size:0.78rem; color:var(--text-secondary); line-height:1.5;">
+                <strong style="color:var(--green);">💪 Composure:</strong> ${p.keyStrength}
+              </p>
+              <p style="font-size:0.78rem; color:var(--text-secondary); line-height:1.5;">
+                <strong style="color:var(--coral);">⚠️ Vulnerability:</strong> ${p.weakness}
+              </p>
+              
+              <div style="font-size:0.74rem; color:var(--text-muted);">
+                📈 Live Form Factor: 
+                <span style="color:${p.currentFormBoost >= 0 ? 'var(--green)' : 'var(--coral)'}; font-weight:700;">
+                  ${p.currentFormBoost >= 0 ? '+' : ''}${p.currentFormBoost} points
+                </span>
+              </div>
+            </div>
+
+            <div style="font-size:0.62rem; color:var(--text-muted); margin-top:10px; text-align:right;" class="lbl-expand">
+              ▼ Tap for details
+            </div>
+          `;
+          
+          const drawer = card.querySelector(".clutch-drawer");
+          const lblExpand = card.querySelector(".lbl-expand");
+          
+          card.addEventListener("click", (e) => {
+            const isOpen = drawer.style.display === "flex";
+            drawer.style.display = isOpen ? "none" : "flex";
+            lblExpand.innerText = isOpen ? "▼ Tap for details" : "▲ Less";
+          });
+
+          playersContainer.appendChild(card);
+        });
+
+        // GSAP visuals
+        gsap.from("#results-panel > div, .player-clutch-card", {
+          y: 30,
+          opacity: 0,
+          stagger: 0.05,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+      }
+
+      // VanillaTilt
+      VanillaTilt.init(document.querySelectorAll(".glass-card"), { max: 4, speed: 600 });
+    });
+  </script>
+</body>
+</html>

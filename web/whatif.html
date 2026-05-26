@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>What-If alternate Simulator — Reality Engine | IPL AI Suite</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css"/>
+
+  <style>
+    /* Scoped Style Overrides for What-If Page */
+    .whatif-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    @media (min-width: 900px) {
+      .whatif-container { grid-template-columns: 380px 1fr; }
+    }
+
+    /* Form Fields styling */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .form-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: var(--white);
+      font-family: var(--font-main);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--purple);
+    }
+    select.form-input option {
+      background: var(--navy-mid);
+      color: var(--white);
+    }
+
+    /* Preset buttons */
+    .preset-btn {
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(139, 92, 246, 0.04);
+      border: 1px solid rgba(139, 92, 246, 0.12);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-family: var(--font-main);
+      line-height: 1.4;
+      transition: all 0.2s ease;
+    }
+    .preset-btn:hover {
+      border-color: rgba(139, 92, 246, 0.35);
+      color: var(--purple);
+      background: rgba(139, 92, 246, 0.08);
+      transform: translateX(2px);
+    }
+
+    /* Timeline layouts */
+    .timelines-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 600px) {
+      .timelines-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Vertical timeline event line */
+    .event-row {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .event-marker-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .event-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 800;
+    }
+    .event-line {
+      width: 2px;
+      flex: 1;
+      margin-top: 4px;
+    }
+
+    /* Nav Dropdown styling */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(13, 21, 38, 0.95);
+      backdrop-filter: blur(20px);
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      z-index: 500;
+      padding: 8px 0;
+      margin-top: 8px;
+    }
+    .dropdown-content a {
+      color: rgba(255,255,255,0.7);
+      padding: 10px 20px;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255,255,255,0.06);
+      color: #00d4ff;
+    }
+    .nav-dropdown:hover .dropdown-content {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="float-elements">
+    <div class="float-el">⚡</div>
+    <div class="float-el">🔀</div>
+    <div class="float-el">🦋</div>
+    <div class="float-el">🌀</div>
+    <div class="float-el">🔮</div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- NAVIGATION -->
+    <nav class="nav">
+      <a href="index.html" class="nav-logo">🏏 IPL AI Suite</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="aki-cricket.html" class="nav-link">Aki-Cricket</a>
+        <a href="watch-party.html" class="nav-link">Watch Party</a>
+        
+        <div class="nav-dropdown">
+          <a href="#" class="nav-link active">AI Experiences ▾</a>
+          <div class="dropdown-content">
+            <a href="drs.html">🎬 AI DRS</a>
+            <a href="scriptwriter.html">📜 Scriptwriter</a>
+            <a href="predictor.html">📊 Predictor</a>
+            <a href="whatif.html" style="color: #00d4ff;">⚡ What-If</a>
+            <a href="clutch.html">🔥 Clutch Index</a>
+            <a href="fixer.html">🕵️ Match Fixer</a>
+            <a href="quiz.html">🎯 Live Quiz</a>
+            <a href="commentary.html">🎙️ Commentary</a>
+            <a href="tech-stack.html">🏆 Google Tech</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN GRID SECTION -->
+    <main class="section">
+      <!-- Header -->
+      <div class="anim-up" style="margin-bottom: 40px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <div style="font-size: 1.5rem;">⚡</div>
+          <span class="badge badge-blue" style="border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.15); color: var(--purple);">Alternate realities compiler</span>
+        </div>
+        <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">
+          What-If <span class="grad-blue" style="background: linear-gradient(135deg, var(--purple), var(--coral)); -webkit-background-clip: text; background-clip: text;">Reality Engine</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 580px;">
+          Adjust a single turning point in a cricket match's history. Our AI simulates a parallel timeline, outputting side-by-side timelines and calculating the cascading butterfly effect.
+        </p>
+      </div>
+
+      <!-- Container -->
+      <div class="whatif-container">
+        
+        <!-- Left panel: Parameters selection -->
+        <div class="anim-left glass-card" style="padding: 22px; border-color: rgba(139, 92, 246, 0.12);">
+          <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--purple); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px;">
+            Match Divergence setup
+          </h3>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <!-- Teams select -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Team 1 (Batting)</label>
+                <select id="team1" class="form-input">
+                  <option value="Mumbai Indians" selected>Mumbai Indians</option>
+                  <option value="Chennai Super Kings">Chennai Super Kings</option>
+                  <option value="Royal Challengers Bengaluru">Royal Challengers Bengaluru</option>
+                  <option value="Kolkata Knight Riders">Kolkata Knight Riders</option>
+                  <option value="Delhi Capitals">Delhi Capitals</option>
+                  <option value="Rajasthan Royals">Rajasthan Royals</option>
+                  <option value="Sunrisers Hyderabad">Sunrisers Hyderabad</option>
+                  <option value="Punjab Kings">Punjab Kings</option>
+                  <option value="Lucknow Super Giants">Lucknow Super Giants</option>
+                  <option value="Gujarat Titans">Gujarat Titans</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Team 2 (Bowling)</label>
+                <select id="team2" class="form-input">
+                  <option value="Mumbai Indians">Mumbai Indians</option>
+                  <option value="Chennai Super Kings" selected>Chennai Super Kings</option>
+                  <option value="Royal Challengers Bengaluru">Royal Challengers Bengaluru</option>
+                  <option value="Kolkata Knight Riders">Kolkata Knight Riders</option>
+                  <option value="Delhi Capitals">Delhi Capitals</option>
+                  <option value="Rajasthan Royals">Rajasthan Royals</option>
+                  <option value="Sunrisers Hyderabad">Sunrisers Hyderabad</option>
+                  <option value="Punjab Kings">Punjab Kings</option>
+                  <option value="Lucknow Super Giants">Lucknow Super Giants</option>
+                  <option value="Gujarat Titans">Gujarat Titans</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Score stats -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+              <div class="form-group">
+                <label class="form-label">Score</label>
+                <input id="score" type="text" class="form-input" value="145/6"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Overs Elapsed</label>
+                <input id="overs" type="text" class="form-input" value="18.4"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Target</label>
+                <input id="target" type="number" class="form-input" value="172"/>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Actual Result</label>
+              <input id="result" type="text" class="form-input" value="Chennai Super Kings won by 4 wickets"/>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Venue</label>
+              <input id="venue" type="text" class="form-input" value="Wankhede Stadium"/>
+            </div>
+
+            <!-- Turning Point -->
+            <div class="form-group">
+              <label class="form-label" style="color: var(--purple);">⚡ THE TURNING POINT (What changes?)</label>
+              <textarea id="turningPoint" class="form-input" rows="3" style="resize: none; line-height: 1.5;" placeholder="e.g. What if MS Dhoni wasn't run out in the 17th over?"></textarea>
+            </div>
+
+            <!-- Presets -->
+            <div class="form-group">
+              <label class="form-label">Quick Presets</label>
+              <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
+                <button class="preset-btn" data-text="What if MS Dhoni wasn't run out in the 2019 World Cup semi-final?">🔀 2019 WC: Dhoni survives run-out</button>
+                <button class="preset-btn" data-text="What if Virat Kohli hadn't dropped that catch in the final over?">🔀 final over: Kohli drops catch</button>
+                <button class="preset-btn" data-text="What if the umpire hadn't given that controversial no-ball in the final over?">🔀 controversy: No-ball call overturned</button>
+              </div>
+            </div>
+
+            <!-- Action -->
+            <div style="margin-top: 8px;">
+              <button id="btn-simulate" class="btn" style="width: 100%; justify-content: center; background: linear-gradient(135deg, var(--purple), var(--coral)); color: var(--white); box-shadow: 0 0 20px rgba(139,92,246,0.3); font-size: 0.9rem;">
+                ⚡ Simulate Alternate Universe
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right panel: Results display -->
+        <div id="results-panel" class="anim-up" style="display: none; flex-direction: column; gap: 20px;">
+          
+          <!-- Divergence point badge -->
+          <div style="padding: 14px 20px; background: rgba(139, 92, 246, 0.06); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 16px; display: flex; gap: 12px; align-items: flex-start;">
+            <span style="font-size: 1.4rem;">🔀</span>
+            <div>
+              <div style="font-size: 0.7rem; color: var(--purple); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">
+                DIVERGENCE POINT CAPTURED
+              </div>
+              <p id="divergence-text" style="font-size: 0.9rem; color: var(--white); font-style: italic; margin-top: 2px;"></p>
+            </div>
+          </div>
+
+          <!-- Dual Timelines Columns -->
+          <div class="timelines-grid">
+            
+            <!-- Column 1: Real Timeline -->
+            <div class="glass-card" style="border-color: rgba(0, 212, 255, 0.15); background: rgba(0, 212, 255, 0.02);">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+                <span style="font-size: 1.1rem;">⏱️</span>
+                <span style="font-size: 0.72rem; font-weight: 700; color: var(--blue); letter-spacing: 1px; text-transform: uppercase;" id="lbl-real-title">
+                  WHAT ACTUALLY HAPPENED
+                </span>
+              </div>
+              <div id="real-events-list"></div>
+              
+              <div id="real-final-result" style="padding: 10px 14px; background: rgba(0, 212, 255, 0.08); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 10px; font-size: 0.82rem; font-weight: 700; color: var(--blue); margin-top: 10px;">
+                🏆 CSK won by 4 wickets
+              </div>
+            </div>
+
+            <!-- Column 2: Alternate Timeline -->
+            <div class="glass-card" style="border-color: rgba(139, 92, 246, 0.2); background: rgba(139, 92, 246, 0.02); position: relative;">
+              <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--purple), transparent);"></div>
+              
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 1.1rem;">🔀</span>
+                <span style="font-size: 0.72rem; font-weight: 700; color: var(--purple); letter-spacing: 1px; text-transform: uppercase;" id="lbl-alt-title">
+                  THE ALTERNATE UNIVERSE
+                </span>
+              </div>
+              
+              <!-- Ripple Effect -->
+              <p id="ripple-text" style="font-size: 0.76rem; color: var(--text-muted); font-style: italic; line-height: 1.6; padding: 8px 12px; background: rgba(139, 92, 246, 0.05); border-radius: 8px; margin-bottom: 16px;"></p>
+              
+              <div id="alt-events-list"></div>
+              
+              <div id="alt-final-result" style="padding: 10px 14px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 10px; font-size: 0.82rem; font-weight: 700; color: var(--purple); margin-top: 10px;">
+                🔀 MI won by 8 runs
+              </div>
+              <div id="probability-shift" style="margin-top: 10px; font-size: 0.74rem; color: var(--text-muted);"></div>
+            </div>
+
+          </div>
+
+          <!-- Butterfly Effect -->
+          <div class="glass-card" style="border-color: rgba(255, 215, 0, 0.2); background: rgba(255, 215, 0, 0.03); display: flex; gap: 14px; align-items: flex-start;">
+            <span style="font-size: 1.6rem;">🦋</span>
+            <div>
+              <div style="font-size: 0.7rem; color: var(--gold); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">
+                THE BUTTERFLY EFFECT
+              </div>
+              <p id="butterfly-text" style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; margin: 0;"></p>
+            </div>
+          </div>
+
+          <!-- Confidence score -->
+          <div class="glass-card" style="padding: 12px 20px; display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 0.78rem; color: var(--text-muted);">AI Reality simulation confidence: </span>
+            <div class="progress-bar" style="flex: 1; height: 5px;">
+              <div id="bar-confidence" class="progress-fill" style="width: 0%; background: linear-gradient(90deg, var(--purple), var(--coral));"></div>
+            </div>
+            <span id="txt-confidence" style="font-size: 0.82rem; font-weight: 700; color: var(--purple);">92%</span>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/key.js"></script>
+  <script src="js/gemini.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btnSimulate = document.getElementById("btn-simulate");
+      const resultsPanel = document.getElementById("results-panel");
+      const divergenceText = document.getElementById("divergence-text");
+      const turningPointInput = document.getElementById("turningPoint");
+      
+      const realEventsList = document.getElementById("real-events-list");
+      const realFinalResult = document.getElementById("real-final-result");
+      const lblRealTitle = document.getElementById("lbl-real-title");
+
+      const altEventsList = document.getElementById("alt-events-list");
+      const altFinalResult = document.getElementById("alt-final-result");
+      const lblAltTitle = document.getElementById("lbl-alt-title");
+      const rippleText = document.getElementById("ripple-text");
+      const probabilityShift = document.getElementById("probability-shift");
+
+      const butterflyText = document.getElementById("butterfly-text");
+      const barConfidence = document.getElementById("bar-confidence");
+      const txtConfidence = document.getElementById("txt-confidence");
+
+      // Presets hook
+      document.querySelectorAll(".preset-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          turningPointInput.value = btn.getAttribute("data-text");
+        });
+      });
+
+      btnSimulate.addEventListener("click", async () => {
+        const team1 = document.getElementById("team1").value;
+        const team2 = document.getElementById("team2").value;
+        const score = document.getElementById("score").value;
+        const overs = document.getElementById("overs").value;
+        const target = document.getElementById("target").value;
+        const resultVal = document.getElementById("result").value;
+        const venue = document.getElementById("venue").value;
+        const tp = turningPointInput.value;
+
+        if (!tp.trim()) {
+          alert("Please describe a turning point.");
+          return;
+        }
+
+        btnSimulate.disabled = true;
+        btnSimulate.innerHTML = `<span class="spinner" style="width: 14px; height: 14px; border-width: 2px;"></span> Recalculating reality...`;
+
+        try {
+          const matchContext = { team1, team2, score, overs, target, result: resultVal, venue };
+          const data = await window.gemini.generateWhatIf(matchContext, tp);
+          displaySimulation(data);
+        } catch (e) {
+          alert("Simulation fail: " + e.message);
+        } finally {
+          btnSimulate.disabled = false;
+          btnSimulate.innerHTML = `⚡ Simulate Alternate Universe`;
+        }
+      });
+
+      function displaySimulation(data) {
+        resultsPanel.style.display = "flex";
+        divergenceText.innerText = `"${data.turningPoint}"`;
+
+        // Render timelines
+        lblRealTitle.innerText = data.realTimeline.title;
+        lblAltTitle.innerText = data.alternateTimeline.title;
+        rippleText.innerText = data.alternateTimeline.rippleEffect || "Events cascade through standard probability changes.";
+
+        renderEventsList(realEventsList, data.realTimeline.keyMoments, "var(--blue)", "#00d4ff");
+        realFinalResult.innerText = `🏆 ${data.realTimeline.result}`;
+
+        renderEventsList(altEventsList, data.alternateTimeline.keyMoments, "var(--purple)", "#8b5cf6");
+        altFinalResult.innerText = `🔀 ${data.alternateTimeline.result}`;
+        probabilityShift.innerText = `📊 ${data.alternateTimeline.winProbabilityShift || ""}`;
+
+        // Summary metrics
+        butterflyText.innerText = data.butterflyEffect;
+        txtConfidence.innerText = data.confidenceScore + "%";
+        barConfidence.style.width = data.confidenceScore + "%";
+
+        // GSAP visuals
+        gsap.from("#results-panel .glass-card, .event-row", {
+          y: 24,
+          opacity: 0,
+          stagger: 0.05,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+      }
+
+      function renderEventsList(container, moments, colorVal, colorHex) {
+        container.innerHTML = "";
+        moments.forEach((m, idx) => {
+          const row = document.createElement("div");
+          row.className = "event-row";
+          row.innerHTML = `
+            <div class="event-marker-col">
+              <div class="event-badge" style="background:${colorHex}18; border:1.5px solid ${colorHex}55; color:${colorVal};">
+                ${m.over}
+              </div>
+              <div class="event-line" style="background:${colorHex}22;"></div>
+            </div>
+            <div style="padding-bottom: 8px;">
+              <h5 style="font-size:0.88rem; font-weight:600; color:var(--white); margin-bottom:2px;">${m.event}</h5>
+              <p style="font-size:0.75rem; color:var(--text-secondary);">${m.impact}</p>
+            </div>
+          `;
+          container.appendChild(row);
+        });
+      }
+
+      // VanillaTilt
+      VanillaTilt.init(document.querySelectorAll(".glass-card"), { max: 4, speed: 600 });
+    });
+  </script>
+</body>
+</html>

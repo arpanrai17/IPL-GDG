@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Match Outcome Predictor — AI Live Probability | IPL AI Suite</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css"/>
+
+  <style>
+    /* Scoped Style Overrides for Predictor Page */
+    .pred-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    @media (min-width: 900px) {
+      .pred-container { grid-template-columns: 1fr 1.1fr; }
+    }
+
+    /* Form Fields styling */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      color: var(--white);
+      font-family: var(--font-main);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--gold);
+    }
+    select.form-input option {
+      background: var(--navy-mid);
+      color: var(--white);
+    }
+
+    /* Custom horizontal probability bar */
+    .prob-track {
+      background: rgba(255,255,255,0.06);
+      height: 10px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 8px 0 16px;
+    }
+    .prob-fill {
+      height: 100%;
+      border-radius: 6px;
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.1, 1, 0.1, 1);
+    }
+
+    /* Nav Dropdown styling */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(13, 21, 38, 0.95);
+      backdrop-filter: blur(20px);
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      z-index: 500;
+      padding: 8px 0;
+      margin-top: 8px;
+    }
+    .dropdown-content a {
+      color: rgba(255,255,255,0.7);
+      padding: 10px 20px;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255,255,255,0.06);
+      color: #00d4ff;
+    }
+    .nav-dropdown:hover .dropdown-content {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="float-elements">
+    <div class="float-el">📊</div>
+    <div class="float-el">📈</div>
+    <div class="float-el">🔮</div>
+    <div class="float-el">🏆</div>
+    <div class="float-el">⚡</div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- NAVIGATION -->
+    <nav class="nav">
+      <a href="index.html" class="nav-logo">🏏 IPL AI Suite</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="aki-cricket.html" class="nav-link">Aki-Cricket</a>
+        <a href="watch-party.html" class="nav-link">Watch Party</a>
+        
+        <div class="nav-dropdown">
+          <a href="#" class="nav-link active">AI Experiences ▾</a>
+          <div class="dropdown-content">
+            <a href="drs.html">🎬 AI DRS</a>
+            <a href="scriptwriter.html">📜 Scriptwriter</a>
+            <a href="predictor.html" style="color: #00d4ff;">📊 Predictor</a>
+            <a href="whatif.html">⚡ What-If</a>
+            <a href="clutch.html">🔥 Clutch Index</a>
+            <a href="fixer.html">🕵️ Match Fixer</a>
+            <a href="quiz.html">🎯 Live Quiz</a>
+            <a href="commentary.html">🎙️ Commentary</a>
+            <a href="tech-stack.html">🏆 Google Tech</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- CONTENT SECTION -->
+    <main class="section">
+      <!-- Header -->
+      <div class="anim-up" style="margin-bottom: 40px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <div style="font-size: 1.5rem;">📊</div>
+          <span class="badge badge-gold">Analytical Predictor Engine</span>
+        </div>
+        <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">
+          Match Outcome <span class="grad-gold">Predictor</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 580px;">
+          Input dynamic match parameters. The Gemini-powered compiler models historical data pipelines to output real-time win probabilities, tactical shifts, and restrictive indices.
+        </p>
+      </div>
+
+      <!-- Container -->
+      <div class="pred-container">
+        
+        <!-- Left Panel: Form -->
+        <div class="anim-left glass-card" style="padding: 24px;">
+          <h3 style="font-size: 0.95rem; font-weight: 800; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px;">
+            Match parameters
+          </h3>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <!-- Teams selection -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Batting Team</label>
+                <select id="team1" class="form-input">
+                  <option value="Mumbai Indians">Mumbai Indians</option>
+                  <option value="Chennai Super Kings" selected>Chennai Super Kings</option>
+                  <option value="Royal Challengers Bengaluru">Royal Challengers Bengaluru</option>
+                  <option value="Kolkata Knight Riders">Kolkata Knight Riders</option>
+                  <option value="Delhi Capitals">Delhi Capitals</option>
+                  <option value="Rajasthan Royals">Rajasthan Royals</option>
+                  <option value="Sunrisers Hyderabad">Sunrisers Hyderabad</option>
+                  <option value="Punjab Kings">Punjab Kings</option>
+                  <option value="Lucknow Super Giants">Lucknow Super Giants</option>
+                  <option value="Gujarat Titans">Gujarat Titans</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bowling Team</label>
+                <select id="team2" class="form-input">
+                  <option value="Mumbai Indians" selected>Mumbai Indians</option>
+                  <option value="Chennai Super Kings">Chennai Super Kings</option>
+                  <option value="Royal Challengers Bengaluru">Royal Challengers Bengaluru</option>
+                  <option value="Kolkata Knight Riders">Kolkata Knight Riders</option>
+                  <option value="Delhi Capitals">Delhi Capitals</option>
+                  <option value="Rajasthan Royals">Rajasthan Royals</option>
+                  <option value="Sunrisers Hyderabad">Sunrisers Hyderabad</option>
+                  <option value="Punjab Kings">Punjab Kings</option>
+                  <option value="Lucknow Super Giants">Lucknow Super Giants</option>
+                  <option value="Gujarat Titans">Gujarat Titans</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Score metrics -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label">Live Score</label>
+                <input id="score" type="text" class="form-input" value="142/3"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Overs Bowled</label>
+                <input id="overs" type="text" class="form-input" value="16.4"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Target Total</label>
+                <input id="target" type="number" class="form-input" value="180"/>
+              </div>
+            </div>
+
+            <!-- Field factors -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label">Pitch Condition</label>
+                <input id="pitch" type="text" class="form-input" value="Dusty & spinning"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Weather</label>
+                <input id="weather" type="text" class="form-input" value="Clear with heavy dew"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Stadium / Venue</label>
+                <input id="venue" type="text" class="form-input" value="Wankhede Stadium"/>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="margin-top: 10px;">
+              <button id="btn-predict" class="btn btn-gold" style="width: 100%; justify-content: center; gap: 8px;">
+                🔮 Calculate Win Probability
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right Panel: Predictions -->
+        <div id="results-panel" class="anim-up" style="display: none; flex-direction: column; gap: 20px;">
+          
+          <!-- Win probability indicators -->
+          <div class="glass-card" style="border-color: rgba(255, 215, 0, 0.2); background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(0,0,0,0.1));">
+            <h4 style="font-size: 0.8rem; color: var(--gold); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px;">
+              📊 AI Win Probability
+            </h4>
+            
+            <!-- Team 1 -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 600; margin-bottom: 4px;">
+                <span id="name-t1">Chennai Super Kings</span>
+                <span id="prob-t1" style="color: var(--green); font-weight: 800;">68%</span>
+              </div>
+              <div class="prob-track">
+                <div id="fill-t1" class="prob-fill" style="background: linear-gradient(90deg, var(--green), #00d4ff); box-shadow: 0 0 10px rgba(0,255,136,0.35);"></div>
+              </div>
+            </div>
+
+            <!-- Team 2 -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 600; margin-bottom: 4px;">
+                <span id="name-t2">Mumbai Indians</span>
+                <span id="prob-t2" style="color: var(--coral); font-weight: 800;">32%</span>
+              </div>
+              <div class="prob-track">
+                <div id="fill-t2" class="prob-fill" style="background: linear-gradient(90deg, var(--coral), #ff4060); box-shadow: 0 0 10px rgba(255,64,96,0.35);"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Winner Announcement Badge -->
+          <div id="winner-badge" class="glass-card" style="text-align: center; border-color: rgba(0, 255, 136, 0.25); background: rgba(0, 255, 136, 0.04); padding: 20px 24px;">
+            <div style="font-size: 0.7rem; color: var(--green); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;">
+              🏆 AI STRATEGIC PREDICTION
+            </div>
+            <h2 id="winner-name" style="font-size: 1.5rem; font-weight: 900; color: var(--white); margin-bottom: 4px;">
+              Chennai Super Kings
+            </h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">
+              is predicted to win • <span id="winner-conf" style="font-weight: 700; color: var(--green);">84%</span> confidence score
+            </p>
+          </div>
+
+          <!-- Key Factors -->
+          <div class="glass-card">
+            <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">Key Analytical Factors</h4>
+            <div id="factors-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          </div>
+
+          <!-- Tactical breakdown text -->
+          <div class="glass-card" style="border-left: 4px solid var(--purple); background: rgba(139, 92, 246, 0.03);">
+            <div style="font-size: 0.72rem; color: var(--purple); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;">
+              🧠 TACTICAL COMPILER RUNBREAK
+            </div>
+            <p id="breakdown-text" style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.65;"></p>
+          </div>
+
+          <!-- Restrictive pressure card -->
+          <div id="pressure-card" style="padding: 16px 20px; background: rgba(255, 140, 0, 0.05); border: 1px solid rgba(255, 140, 0, 0.15); border-radius: 12px; display: flex; gap: 12px; align-items: center;">
+            <span style="font-size: 1.5rem;">⚡</span>
+            <div>
+              <div style="font-size: 0.7rem; color: #ff8c00; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;">
+                HIGH RESTRICTION CRUSH INDEX
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">
+                <strong id="pressure-team" style="color: var(--white);">Mumbai Indians</strong> — <span id="pressure-reason">Requires boundaries at 12.8 per over on dusty spin tracks.</span>
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/key.js"></script>
+  <script src="js/gemini.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btnPredict = document.getElementById("btn-predict");
+      const resultsPanel = document.getElementById("results-panel");
+      
+      const txtT1 = document.getElementById("name-t1");
+      const txtT2 = document.getElementById("name-t2");
+      const probT1 = document.getElementById("prob-t1");
+      const probT2 = document.getElementById("prob-t2");
+      const fillT1 = document.getElementById("fill-t1");
+      const fillT2 = document.getElementById("fill-t2");
+
+      const winnerName = document.getElementById("winner-name");
+      const winnerConf = document.getElementById("winner-conf");
+      const factorsList = document.getElementById("factors-list");
+      const breakdownText = document.getElementById("breakdown-text");
+      const pressureTeam = document.getElementById("pressure-team");
+      const pressureReason = document.getElementById("pressure-reason");
+
+      btnPredict.addEventListener("click", async () => {
+        const team1 = document.getElementById("team1").value;
+        const team2 = document.getElementById("team2").value;
+        const score = document.getElementById("score").value;
+        const overs = document.getElementById("overs").value;
+        const target = document.getElementById("target").value;
+        const pitch = document.getElementById("pitch").value;
+        const weather = document.getElementById("weather").value;
+        const venue = document.getElementById("venue").value;
+
+        btnPredict.disabled = true;
+        btnPredict.innerHTML = `<span class="spinner" style="width: 14px; height: 14px; border-width: 2px;"></span> Simulating match outcomes...`;
+
+        try {
+          const matchData = { team1, team2, score, overs, target, pitch, weather, venue };
+          const result = await window.gemini.callGeminiForPrediction(matchData);
+          displayPrediction(result);
+        } catch (e) {
+          alert("Error generating prediction: " + e.message);
+        } finally {
+          btnPredict.disabled = false;
+          btnPredict.innerHTML = `🔮 Calculate Win Probability`;
+        }
+      });
+
+      function displayPrediction(data) {
+        resultsPanel.style.display = "flex";
+
+        // Probabilities
+        txtT1.innerText = data.team1;
+        txtT2.innerText = data.team2;
+        probT1.innerText = data.team1WinProb + "%";
+        probT2.innerText = data.team2WinProb + "%";
+        fillT1.style.width = data.team1WinProb + "%";
+        fillT2.style.width = data.team2WinProb + "%";
+
+        // Winner card
+        winnerName.innerText = data.predictedWinner;
+        winnerConf.innerText = data.confidence + "%";
+        
+        // Dynamic green border if team1 win, else coral border
+        const isT1Winner = data.predictedWinner === data.team1;
+        const badge = document.getElementById("winner-badge");
+        badge.style.borderColor = isT1Winner ? "rgba(0, 255, 136, 0.25)" : "rgba(255, 64, 96, 0.25)";
+        badge.style.background = isT1Winner ? "rgba(0, 255, 136, 0.04)" : "rgba(255, 64, 96, 0.04)";
+        winnerConf.style.color = isT1Winner ? "var(--green)" : "var(--coral)";
+
+        // Factors list
+        factorsList.innerHTML = "";
+        data.keyFactors.forEach(factor => {
+          const item = document.createElement("div");
+          item.style = "display:flex; gap:10px; align-items:flex-start; font-size:0.86rem; color:var(--text-secondary);";
+          item.innerHTML = `<span style="color:var(--gold); font-weight:700;">▲</span> <span>${factor}</span>`;
+          factorsList.appendChild(item);
+        });
+
+        // Detailed texts
+        breakdownText.innerText = data.analysis;
+        pressureTeam.innerText = data.pressureTeam;
+        pressureReason.innerText = data.pressureReason;
+
+        // Visual animation triggers
+        gsap.from("#results-panel > div, #pressure-card", {
+          y: 30,
+          opacity: 0,
+          stagger: 0.08,
+          duration: 0.6,
+          ease: "power2.out"
+        });
+      }
+
+      // VanillaTilt
+      VanillaTilt.init(document.querySelectorAll(".glass-card"), { max: 4, speed: 600 });
+    });
+  </script>
+</body>
+</html>

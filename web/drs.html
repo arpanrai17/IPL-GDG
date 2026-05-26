@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI DRS — Umpire Decision Review System | IPL AI Suite</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css"/>
+
+  <style>
+    /* Scoped Style Overrides for DRS Page */
+    .drs-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    @media (min-width: 900px) {
+      .drs-container { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Drop Zone styling */
+    .drop-zone {
+      border: 2px dashed rgba(0, 212, 255, 0.2);
+      background: rgba(255, 255, 255, 0.01);
+      border-radius: 20px;
+      padding: 60px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .drop-zone.hover {
+      border-color: var(--blue);
+      background: rgba(0, 212, 255, 0.05);
+      transform: scale(1.01);
+    }
+    .drop-zone-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+
+    /* Preview area */
+    .preview-container {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 255, 136, 0.15);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .preview-media {
+      width: 100%;
+      display: block;
+      max-height: 420px;
+      object-fit: cover;
+    }
+
+    /* Scanning effects */
+    .scanner-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      display: none;
+      z-index: 10;
+    }
+    .scan-line {
+      position: absolute;
+      left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      box-shadow: 0 0 20px var(--green), 0 0 40px var(--green);
+      animation: scan 2s linear infinite;
+    }
+    @keyframes scan {
+      0% { top: 0%; }
+      100% { top: 100%; }
+    }
+    .scan-badge {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: 1px solid rgba(0,255,136,0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--green);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* Confidence progress */
+    .confidence-track {
+      background: rgba(255,255,255,0.06);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    .confidence-fill {
+      height: 100%;
+      border-radius: 4px;
+      width: 0%;
+      transition: width 1.5s cubic-bezier(0.1, 1, 0.1, 1);
+    }
+
+    /* Verdict card */
+    .verdict-banner {
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+      transform: scale(0.95);
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .verdict-banner.show {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .verdict-banner.out {
+      background: linear-gradient(135deg, rgba(255, 64, 96, 0.1), rgba(255,64,96,0.03));
+      border: 2px solid var(--coral);
+      box-shadow: 0 0 30px rgba(255, 64, 96, 0.2);
+    }
+    .verdict-banner.not-out {
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0,255,136,0.03));
+      border: 2px solid var(--green);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+    }
+    .verdict-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .verdict-banner.out .verdict-title { color: var(--coral); text-shadow: 0 0 20px rgba(255,64,96,0.4); }
+    .verdict-banner.not-out .verdict-title { color: var(--green); text-shadow: 0 0 20px rgba(0,255,136,0.4); }
+
+    /* Tech details */
+    .tech-pill {
+      padding: 10px 14px;
+      background: rgba(0, 212, 255, 0.04);
+      border: 1px solid rgba(0, 212, 255, 0.1);
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    /* Nav Dropdown styling */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(13, 21, 38, 0.95);
+      backdrop-filter: blur(20px);
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      z-index: 500;
+      padding: 8px 0;
+      margin-top: 8px;
+    }
+    .dropdown-content a {
+      color: rgba(255,255,255,0.7);
+      padding: 10px 20px;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255,255,255,0.06);
+      color: #00d4ff;
+    }
+    .nav-dropdown:hover .dropdown-content {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating background elements -->
+  <div class="float-elements">
+    <div class="float-el">🏏</div>
+    <div class="float-el">⚾</div>
+    <div class="float-el">✨</div>
+    <div class="float-el">🔥</div>
+    <div class="float-el">📊</div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- NAVIGATION -->
+    <nav class="nav">
+      <a href="index.html" class="nav-logo">🏏 IPL AI Suite</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="aki-cricket.html" class="nav-link">Aki-Cricket</a>
+        <a href="watch-party.html" class="nav-link">Watch Party</a>
+        
+        <!-- Dropdown Menu -->
+        <div class="nav-dropdown">
+          <a href="#" class="nav-link active">AI Experiences ▾</a>
+          <div class="dropdown-content">
+            <a href="drs.html" style="color: #00d4ff;">🎬 AI DRS</a>
+            <a href="scriptwriter.html">📜 Scriptwriter</a>
+            <a href="predictor.html">📊 Predictor</a>
+            <a href="whatif.html">⚡ What-If</a>
+            <a href="clutch.html">🔥 Clutch Index</a>
+            <a href="fixer.html">🕵️ Match Fixer</a>
+            <a href="quiz.html">🎯 Live Quiz</a>
+            <a href="commentary.html">🎙️ Commentary</a>
+            <a href="tech-stack.html">🏆 Google Tech</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN BODY -->
+    <main class="section">
+      <!-- Page Header -->
+      <div class="anim-up" style="margin-bottom: 40px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <div style="font-size: 1.5rem;">🎬</div>
+          <span class="badge badge-blue">Gemini Vision AI</span>
+        </div>
+        <h1 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px;">
+          AI Decision <span class="grad-blue">Review System</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 580px;">
+          Upload any match frame or video clip. Our advanced Gemini multi-modal engine conducts HotSpot, Snickometer, and Hawk-Eye path analysis to deliver a dramatic DRS verdict.
+        </p>
+      </div>
+
+      <!-- Content Grid -->
+      <div class="drs-container">
+        
+        <!-- Left Panel: Upload Zone -->
+        <div class="anim-left" style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Drop Zone -->
+          <div id="drop-zone" class="drop-zone glass-card">
+            <input type="file" id="file-input" accept="image/*,video/*" style="display: none;"/>
+            <div class="drop-zone-icon">📤</div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 6px;">Upload Match File</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Drag & drop or click to choose a cricket image or video</p>
+            <span style="font-size: 0.72rem; color: rgba(255,255,255,0.3);">Supports JPG, PNG, WEBP, MP4, MOV (Canvas extracts frame at 1s)</span>
+          </div>
+
+          <!-- Preview & Scan Area -->
+          <div id="preview-panel" class="glass-card preview-container" style="display: none;">
+            <div id="video-badge" style="position: absolute; top: 12px; left: 12px; z-index: 15; background: rgba(0,0,0,0.8); border: 1px solid rgba(139,92,246,0.3); padding: 4px 10px; border-radius: 50px; font-size: 0.68rem; font-weight: 700; color: var(--purple); display: none;">
+              📹 VIDEO FRAME CAPTURED
+            </div>
+            
+            <img id="preview-img" class="preview-media" src="" alt="Cricket Scene Preview"/>
+            
+            <!-- Scanning lines -->
+            <div id="scanner" class="scanner-overlay">
+              <div class="scan-line"></div>
+              <div class="scan-badge">
+                <div class="spinner" style="width: 14px; height: 14px; border-width: 2px;"></div>
+                <span>CONDUCTING MULTI-SPECTRAL ANALYSIS...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div id="action-btns" style="display: flex; gap: 12px; display: none;">
+            <button id="btn-analyze" class="btn btn-primary" style="flex: 1; justify-content: center; gap: 10px;">
+              ⚡ Run AI DRS Analysis
+            </button>
+            <button id="btn-reset" class="btn btn-ghost" style="padding: 14px 20px;">
+              🔄 Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Panel: Results -->
+        <div id="results-panel" class="anim-up" style="display: flex; flex-direction: column; gap: 20px; display: none;">
+          
+          <!-- Dramatic Verdict -->
+          <div id="verdict-banner" class="verdict-banner">
+            <span id="verdict-label" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">
+              AI DRS VERDICT
+            </span>
+            <h2 id="verdict-text" class="verdict-title">NOT OUT</h2>
+            <p id="verdict-detail" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+              DECISION CONFIRMED
+            </p>
+          </div>
+
+          <!-- Main Metrics -->
+          <div class="glass-card" style="display: flex; flex-direction: column; gap: 16px;">
+            <h4 style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;">Review Parameters</h4>
+            
+            <!-- Wicket Decision -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">
+                <span>Wicket Decision Accuracy</span>
+                <span id="txt-decision" style="color: var(--blue);">OUT</span>
+              </div>
+              <div class="confidence-track">
+                <div id="bar-decision" class="confidence-fill" style="background: var(--blue);"></div>
+              </div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); text-align: right;" id="pct-decision">92% confidence</div>
+            </div>
+
+            <!-- Delivery Call -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">
+                <span>Delivery Line Call</span>
+                <span id="txt-wide" style="color: var(--gold);">FAIR DELIVERY</span>
+              </div>
+              <div class="confidence-track">
+                <div id="bar-wide" class="confidence-fill" style="background: var(--gold);"></div>
+              </div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); text-align: right;" id="pct-wide">95% confidence</div>
+            </div>
+
+            <!-- Catch Validity -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">
+                <span>Fielder Catch Validity</span>
+                <span id="txt-catch" style="color: var(--purple);">VALID CATCH</span>
+              </div>
+              <div class="confidence-track">
+                <div id="bar-catch" class="confidence-fill" style="background: var(--purple);"></div>
+              </div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); text-align: right;" id="pct-catch">88% confidence</div>
+            </div>
+
+            <!-- LBW probability -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">
+                <span>LBW Wicket-Hitting Probability</span>
+                <span id="txt-lbw" style="color: var(--coral);">88%</span>
+              </div>
+              <div class="confidence-track">
+                <div id="bar-lbw" class="confidence-fill" style="background: var(--coral);"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tech Analysis -->
+          <div class="glass-card" style="display: flex; flex-direction: column; gap: 14px;">
+            <h4 style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;">🔬 Spectral Sensor Feed</h4>
+            
+            <div class="tech-pill">
+              <div style="font-size: 0.65rem; color: var(--blue); font-weight: 700; letter-spacing: 0.8px; margin-bottom: 2px;">🔴 HOTSPOT HEAT SIGNATURE</div>
+              <p id="txt-hotspot" style="font-size: 0.85rem; color: var(--white);"></p>
+            </div>
+            
+            <div class="tech-pill">
+              <div style="font-size: 0.65rem; color: var(--purple); font-weight: 700; letter-spacing: 0.8px; margin-bottom: 2px;">🔊 SNICKOMETER AUDIO FREQUENCY</div>
+              <p id="txt-snicko" style="font-size: 0.85rem; color: var(--white);"></p>
+            </div>
+
+            <div class="tech-pill">
+              <div style="font-size: 0.65rem; color: var(--gold); font-weight: 700; letter-spacing: 0.8px; margin-bottom: 2px;">🦅 HAWK-EYE PREDICTED TRAJECTORY</div>
+              <p id="txt-hawkeye" style="font-size: 0.85rem; color: var(--white);"></p>
+            </div>
+          </div>
+
+          <!-- Key Factors -->
+          <div class="glass-card">
+            <h4 style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">Key Decision Factors</h4>
+            <div id="factors-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+
+          <!-- Fictional Verdict Quote -->
+          <div style="padding: 16px 20px; background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.15); border-left: 4px solid var(--purple); border-radius: 12px;">
+            <div style="font-size: 0.72rem; color: var(--purple); font-weight: 700; letter-spacing: 1px; margin-bottom: 6px;">🎙️ OFFICIAL UMPIRING DIALOGUE</div>
+            <p id="txt-dialogue" style="font-size: 0.88rem; color: var(--text-muted); font-style: italic; line-height: 1.5;"></p>
+          </div>
+
+          <!-- Share actions -->
+          <div style="display: flex; gap: 10px;">
+            <button id="btn-share" class="btn btn-ghost" style="flex: 1; justify-content: center; gap: 6px; font-size: 0.88rem;">
+              📤 Share Review Verdict
+            </button>
+            <button id="btn-speech" class="btn btn-ghost" style="padding: 12px 16px; font-size: 1.1rem;" title="Speak Verdict Aloud">
+              🔊 Hear Verdict
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/key.js"></script>
+  <script src="js/gemini.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const dropZone = document.getElementById("drop-zone");
+      const fileInput = document.getElementById("file-input");
+      const previewPanel = document.getElementById("preview-panel");
+      const previewImg = document.getElementById("preview-img");
+      const videoBadge = document.getElementById("video-badge");
+      const actionBtns = document.getElementById("action-btns");
+      const btnAnalyze = document.getElementById("btn-analyze");
+      const btnReset = document.getElementById("btn-reset");
+      const scanner = document.getElementById("scanner");
+      const resultsPanel = document.getElementById("results-panel");
+      const verdictBanner = document.getElementById("verdict-banner");
+      const verdictText = document.getElementById("verdict-text");
+      const verdictDetail = document.getElementById("verdict-detail");
+
+      let currentBase64 = null;
+      let currentMimeType = "image/jpeg";
+      let isVideoFile = false;
+      let lastVerdictText = "";
+
+      // Drag and drop handlers
+      dropZone.addEventListener("click", () => fileInput.click());
+      
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("hover");
+      });
+      dropZone.addEventListener("dragleave", () => dropZone.classList.remove("hover"));
+      
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("hover");
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+      });
+
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) handleFile(file);
+      });
+
+      // Reset
+      btnReset.addEventListener("click", () => {
+        dropZone.style.display = "flex";
+        previewPanel.style.display = "none";
+        actionBtns.style.display = "none";
+        resultsPanel.style.display = "none";
+        fileInput.value = "";
+        currentBase64 = null;
+        isVideoFile = false;
+        videoBadge.style.display = "none";
+        window.speechSynthesis.cancel();
+      });
+
+      function handleFile(file) {
+        isVideoFile = file.type.startsWith("video/");
+        currentMimeType = isVideoFile ? "image/jpeg" : file.type;
+
+        dropZone.style.display = "none";
+        previewPanel.style.display = "block";
+        actionBtns.style.display = "flex";
+        resultsPanel.style.display = "none";
+
+        if (isVideoFile) {
+          videoBadge.style.display = "inline-block";
+          extractVideoKeyframe(file);
+        } else {
+          videoBadge.style.display = "none";
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            currentBase64 = e.target.result.split(",")[1];
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      // Extract a frame from video at 1s via standard HTML5 Canvas
+      function extractVideoKeyframe(file) {
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.muted = true;
+        video.src = URL.createObjectURL(file);
+        video.currentTime = 1.0;
+        
+        video.addEventListener("seeked", () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth || 640;
+          canvas.height = video.videoHeight || 360;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+          previewImg.src = dataUrl;
+          currentBase64 = dataUrl.split(",")[1];
+          URL.revokeObjectURL(video.src);
+        });
+      }
+
+      // Analyze DRS using Extended GeminiClient
+      btnAnalyze.addEventListener("click", async () => {
+        if (!currentBase64) return;
+        
+        btnAnalyze.disabled = true;
+        btnAnalyze.innerHTML = `<span class="spinner" style="width: 14px; height: 14px; border-width: 2px;"></span> Analyzing...`;
+        scanner.style.display = "block";
+        resultsPanel.style.display = "none";
+
+        try {
+          // Trigger mock delay for visual scanning dramatic effect
+          await new Promise(r => setTimeout(r, 2200));
+          
+          const result = await window.gemini.analyzeDRS(currentBase64, currentMimeType);
+          displayResults(result);
+        } catch (e) {
+          alert("Error conducting DRS vision analysis: " + e.message);
+        } finally {
+          btnAnalyze.disabled = false;
+          btnAnalyze.innerHTML = `⚡ Run AI DRS Analysis`;
+          scanner.style.display = "none";
+        }
+      });
+
+      function displayResults(data) {
+        resultsPanel.style.display = "flex";
+        
+        // Show verdict banner
+        const isOut = data.decision.toUpperCase().includes("OUT") && !data.decision.toUpperCase().includes("NOT");
+        verdictBanner.className = "verdict-banner show " + (isOut ? "out" : "not-out");
+        verdictText.innerText = isOut ? "OUT" : "NOT OUT";
+        verdictDetail.innerText = isOut ? "DECISION OVERTURNED" : "DECISION CONFIRMED";
+        
+        // Text values
+        document.getElementById("txt-decision").innerText = data.decision;
+        document.getElementById("txt-decision").style.color = isOut ? "var(--coral)" : "var(--green)";
+        document.getElementById("txt-wide").innerText = data.wideCall;
+        document.getElementById("txt-catch").innerText = data.catchValidity;
+        document.getElementById("txt-lbw").innerText = data.lbwProbability + "%";
+        
+        document.getElementById("pct-decision").innerText = data.confidence + "% confidence";
+        document.getElementById("pct-wide").innerText = data.wideConfidence + "% confidence";
+        document.getElementById("pct-catch").innerText = data.catchConfidence + "% confidence";
+
+        // Progress bar fills
+        document.getElementById("bar-decision").style.width = data.confidence + "%";
+        document.getElementById("bar-decision").style.background = isOut ? "var(--coral)" : "var(--green)";
+        document.getElementById("bar-wide").style.width = data.wideConfidence + "%";
+        document.getElementById("bar-catch").style.width = data.catchConfidence + "%";
+        document.getElementById("bar-lbw").style.width = data.lbwProbability + "%";
+
+        // Technological sensor readings
+        document.getElementById("txt-hotspot").innerText = data.hotSpotAnalysis;
+        document.getElementById("txt-snicko").innerText = data.snickometer;
+        document.getElementById("txt-hawkeye").innerText = data.hawkeyePath;
+        document.getElementById("txt-dialogue").innerText = `"${data.dramaticVerdict}"`;
+        
+        lastVerdictText = data.dramaticVerdict;
+
+        // Key factors list
+        const factorsList = document.getElementById("factors-list");
+        factorsList.innerHTML = "";
+        data.keyFactors.forEach(factor => {
+          const item = document.createElement("div");
+          item.style = "display:flex; align-items:center; gap:8px; font-size:0.88rem; color:var(--text-secondary);";
+          item.innerHTML = `<span style="color:var(--green); font-size:1.1rem;">✓</span> <span>${factor}</span>`;
+          factorsList.appendChild(item);
+        });
+
+        // Trigger GSAP entry on the results cards
+        gsap.from("#results-panel .glass-card, #verdict-banner", {
+          y: 30,
+          opacity: 0,
+          stagger: 0.1,
+          duration: 0.6,
+          ease: "power2.out"
+        });
+
+        // Proactively read third-umpire verdict aloud
+        speakVerdict(data.dramaticVerdict);
+      }
+
+      // Umpire Voice synthesis
+      function speakVerdict(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.92;
+        utterance.pitch = 0.85; // slightly deeper third umpire radio voice
+        window.speechSynthesis.speak(utterance);
+      }
+
+      document.getElementById("btn-speech").addEventListener("click", () => {
+        if (lastVerdictText) speakVerdict(lastVerdictText);
+      });
+
+      // Share review text
+      document.getElementById("btn-share").addEventListener("click", () => {
+        const text = `🏏 AI DRS Verdict: ${verdictText.innerText}\n\nWide Call: ${document.getElementById("txt-wide").innerText}\nCatch: ${document.getElementById("txt-catch").innerText}\nLBW Probability: ${document.getElementById("txt-lbw").innerText}\n\n🔊 "${lastVerdictText}"\n\n— Played on IPL AI Suite`;
+        if (navigator.share) {
+          navigator.share({ title: "AI DRS Verdict Review", text });
+        } else {
+          navigator.clipboard.writeText(text);
+          alert("DRS Verdict copied to clipboard!");
+        }
+      });
+
+      // VanillaTilt
+      VanillaTilt.init(document.querySelectorAll(".glass-card"), { max: 4, speed: 600 });
+    });
+  </script>
+</body>
+</html>

@@ -386,3 +386,40 @@ body {
   .grid-2 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr; }
 }
+
+/* ─── Nav Dropdown styling ─── */
+.nav-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgba(13, 21, 38, 0.95);
+  backdrop-filter: blur(20px);
+  min-width: 200px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  z-index: 500;
+  padding: 8px 0;
+  margin-top: 8px;
+}
+.dropdown-content a {
+  color: rgba(255,255,255,0.7);
+  padding: 10px 20px;
+  text-decoration: none;
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.dropdown-content a:hover {
+  background: rgba(255,255,255,0.06);
+  color: #00d4ff;
+}
+.nav-dropdown:hover .dropdown-content {
+  display: block;
+}
