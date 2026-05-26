@@ -70,7 +70,7 @@ class AkiCricketGame {
     const prompt = `Question ${this.questionCount}/${this.maxQuestions}. Answers so far: ${JSON.stringify(this.answers)}. ${context}`;
     
     try {
-      const raw = await this.gemini.chat(prompt, this.questionCount === 1 ? AKI_SYSTEM_PROMPT : '');
+      const raw = await this.gemini.chat(prompt, AKI_SYSTEM_PROMPT);
       const parsed = this._parseResponse(raw);
       if (parsed.isGuess) {
         this._endGame(parsed.guess, true);
@@ -132,7 +132,7 @@ class AkiCricketGame {
       return { question: '', thoughts: '', persona: 'dramatic', isGuess: true, guess: guessMatch?.[1]?.trim() || 'Virat Kohli' };
     }
     // Use raw text as question
-    const text = clean.replace(/[{}"\[\]]/g, '').trim().slice(0, 220);
+    const text = clean.replace(/[{}"\[\]]/g, '').trim().slice(0, 500);
     if (text.length > 8) {
       return { question: text, thoughts: '', persona: 'confident', isGuess: false, guess: '' };
     }
